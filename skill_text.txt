@@ -1,0 +1,220 @@
+Ficha de Competencia: Especialista en Analítica Logística e Inteligencia de
+Negocio
+Esta ficha documenta las competencias avanzadas, el dominio metodológico y los casos de uso logísticos reales desarrollados
+para la auditoría, optimización y modelado de las fases de exportación marítima con destino a las Islas Baleares (basado en un
+universo consolidado de 
+ registros de ERP/WMS).
+I. Ficha Resumen de Competencias Técnicas
+Área de Dominio
+Habilidades y Competencias Clave
+Aplicación en el Proyecto
+Estadística
+Robusta
+- Detección de atípicos no paramétrica
+(Tukey).
+- Análisis de distribución bimodal e
+intervalos IQR.
+- Tratamiento de sesgo por ruido
+informático.
+Aislamiento del 
+ al 
+ de datos aberrantes provocados por
+olvidos de confirmación RF en el ERP.
+Modelado
+Analítico
+- Regresión lineal por Mínimos
+Cuadrados Ordinarios (OLS).
+- Modelos predictivos multivariables
+con variables dummy.
+- Correlación Puntual-Biserial (
+).
+Modelado de duración de muelle en función de partidas (
+), factor
+temporal de demanda (
+) y mercancías peligrosas (
+).
+Ingeniería de
+Datos
+- Limpieza y curación de series
+temporales de muelle.
+- Cruces transaccionales en caliente
+(joins) multiactivo.
+- Parseo de formatos de fecha
+compactos (YYMMDD HH:MM).
+Sincronización del archivo volumétrico con el detallado histórico para
+segregar flujos por delegación y día de la semana.
+Visualización
+Ejecutiva
+- Dashboards interactivos y dinámicos
+(Tailwind + Chart.js).
+- Renderizado de expresiones
+matemáticas en LaTeX (MathJax).
+- Maquetación de reportes corporativos
+para exportación PDF.
+Diseño de la consola interactiva de control de muelle y mercancías
+peligrosas (ADR) autodesplegable y exportable.
+II. El Marco Metodológico (El "Playbook" Matemático)
+1. Limpieza de Datos mediante el Límite de Tukey
+67, 562
+8.32%
+14.20%
+r
+​
+pb
+X
+D
+A
+
+Para evitar que los retrasos del sistema ERP (sesiones abiertas durante días) distorsionen las métricas, se aplica el filtro robusto
+de Tukey en lugar de la desviación estándar (que asume erróneamente normalidad):
+Cualquier transacción cuya duración exceda este umbral se segrega del flujo limpio como dato aberrante (ruido sistémico).
+2. Modelado de Regresión Lineal Multivariable (OLS)
+Se modela la duración neta del proceso (
+) basándose en tres variables independientes específicas:
+Variable Cuantitativa (
+): Número de partidas físicas registradas (
+).
+Variable Binaria Temporal (
+): Día de la semana (Lunes-Miércoles = 0, Jueves-Viernes = 1).
+Variable Binaria de Seguridad (
+): Acreditación de Mercancía Peligrosa (Regular = 0, ADR = 1).
+Ecuación del Modelo Unificado:
+Donde:
+ (Intercepto): Representa el tiempo muerto fijo estructural (tiempos administrativos, acople de remolque, trincado,
+papeleo inicial).
+ (Pendientes): El impacto marginal neto (en minutos) que añade cada factor al proceso.
+ (Coeficiente de Determinación): Porcentaje de variación temporal explicada por las variables del modelo.
+III. Hallazgos Operativos de Negocio (Valor Logístico)
+A través de esta competencia analítica, se han auditado las cuatro fases del muelle de exportación de Baleares, revelando
+diagnósticos de alto impacto directivo:
+Fase 1: Recepción de Mercancía (Muelle Acoplado 
+ Volumétrica)
+Diagnóstico de Correlación: Se demuestra una correlación lineal casi nula (
+) entre el número de
+partidas y la duración de la recepción en Barcelona y Valencia.
+El Proceso Físico: El muelle es altamente automatizado y veloz. La pendiente de regresión (
+) confirma que el
+paso por la volumétrica es instantáneo, mientras que el intercepto base (
+) concentra el 
+ del esfuerzo
+en la descarga manual.
+La Excepción de Alicante: Alicante es el único muelle que colapsa en picos de demanda de Jueves-Viernes (
+,
+), incrementando el tiempo medio de muelle en 
+, sugiriendo falta de capacidad física o
+layout saturado.
+Fase 2: Documentación (SLA Marítimo)
+El Impacto del ADR: La fase administrativa se ve severamente afectada por la presencia de Mercancías Peligrosas. En
+Barcelona, tramitar una carga ADR (
+) añade un costo administrativo neto de 
+ (
+).
+Pérdida de Trazabilidad: La complejidad de validar declaraciones ADR ante la aduana y la naviera hace que la tasa de
+rescate estándar de esta fase se desplome de un sólido 
+ (mercancía común) a un crítico 
+ para cargas con
+ADR. El 
+ de las órdenes ADR se bloquean o sufren retrasos administrativos multijornada en el sistema.
+Fase 3: Carga en Almacén (Estiba Final)
+La Paradoja de la Carga (Urgencia de Cierre): De Lunes a Miércoles, la mediana de carga en Barcelona es de
+. Sin embargo, el Jueves y Viernes (días de alta demanda) la mediana desciende a 
+ (
+).
+Rango Intercuart lico (IQR) =
+ıˊ
+Q
+​ −
+3
+Q
+​1
+Valla Superior de Estabilidad (L mite de Tukey) =
+ıˊ
+Q
+​ +
+3
+1.5 × IQR
+Y
+X
+X ∈[1, 7]
+D
+A
+Y = β
+​ +
+0
+β
+​ ×
+1
+X + β
+​ ×
+2
+D + β
+​ ×
+3
+A
+β
+​0
+β
+​j
+R2
+→
+r ≈0.06 −0.10
+β
+​ ≈
+1
+3.0 min
+β
+​ ≈
+0
+36.0 min
+90%
+r = 0.3421
+R =
+2
+11.7%
++43.39 minutos
+A = 1
++48.0 minutos β
+​2
+92.07%
+34.99%
+65%
+163.0 minutos
+135.0 minutos
+β
+​ =
+1
+−109.1 min
+
+Explicación Operativa: Esto demuestra científicamente la "presión del ferry". Para no perder las ventanas de zarpe
+marítimo de fin de semana, los operarios aceleran la estiba física, reduciendo las duraciones medianas del flujo limpio, pero
+a costa de triplicar el caos de registro: la tasa de atípicos (olvidos de cierre de RF en el ERP por apuro) se dispara del 
+al 
+.
+El Costo Fijo del ADR: Cargar mercancía peligrosa en el camión añade una penalización de estiba e inspección visual de
+ (
+) en Barcelona, debido a los protocolos de trincado especial y etiquetado IMDG.
+Fase 4: Bajada Muelle Origen (Tránsito Marítimo)
+Bloqueo de Datos por Terceros: Se expone formalmente que los tiempos del ERP para esta fase no son fiables para medir
+el rendimiento de los transportistas.
+Dependencia Externa: El sistema cierra la transacción basándose en la hora oficial de zarpe de la naviera del puerto de
+Barcelona o Valencia. Aunque el contenedor haya sido depositado de forma ágil y rápida por el chofer terrestre en el muelle
+de la terminal marítima, el ERP infla artificialmente el tiempo de la bajada con la espera en puerto hasta que el barco
+navega.
+IV. Aplicaciones y Casos de Uso del Perfil
+Este perfil de competencia califica al profesional para diseñar e implementar las siguientes soluciones logísticas estratégicas:
+1. Rediseño de Reglas en el WMS/WCS: Programación de alertas predictivas en terminales de radiofrecuencia (RF) que
+obliguen a la confirmación de volumétricas antes de permitir un cambio de ubicación física, reduciendo el 
+ de
+outliers de muelle en BCN.
+2. Sincronización de Ventanas horarias (SLA de Citas): Utilizar la mediana estable de Recepción (
+ a 
+) para
+optimizar los layouts de patio y asignar slots de descarga independientes del volumen de partidas
+7.50%
+20.27%
++10.6 horas β
+​ =
+3
+637.9 min
+9.65%
+≈34 38 min

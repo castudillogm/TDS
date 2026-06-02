@@ -1,0 +1,16 @@
+# Excel Datasets (ignore large raw files)
+Exportaciones - Volumetrica.xlsx
+
+# But keep the small generated reports (optional)
+# !Resultados_Analisis.xlsx
+
+# Python cache & logs
+__pycache__/
+*.pyc
+*.log
+
+# Editor settings & temporary files
+.vscode/
+.idea/
+.gemini/
+.system_generated/
