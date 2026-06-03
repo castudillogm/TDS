@@ -2094,7 +2094,7 @@
             if (adr !== 'ALL') subset = subset.filter(r => r.ADR === adr);
             if (dia !== 'ALL') {
                 const arr = dia.split(',');
-                subset = subset.filter(r => arr.includes(r.Dia));
+                subset = subset.filter(r => arr.includes(r.Dia_Grupo));
             }
             
             if (subset.length === 0) return null;
@@ -2326,9 +2326,33 @@
         // Initialize App on DOM Content Loaded
         document.addEventListener('DOMContentLoaded', () => {
             // Backup initial precalculated stats immediately
-            ORIGINAL_DASHBOARD_STATS = JSON.parse(JSON.stringify(DASHBOARD_STATS));
-            ORIGINAL_REGRESIONES_STATS = JSON.parse(JSON.stringify(REGRESIONES_STATS));
-            ORIGINAL_PARTIDAS_STATS = JSON.parse(JSON.stringify(PARTIDAS_STATS));
+            ORIGINAL_DASHBOARD_STATS = typeof DASHBOARD_STATS !== 'undefined' ? JSON.parse(JSON.stringify(DASHBOARD_STATS)) : {};
+            ORIGINAL_REGRESIONES_STATS = typeof REGRESIONES_STATS !== 'undefined' ? JSON.parse(JSON.stringify(REGRESIONES_STATS)) : [];
+            ORIGINAL_PARTIDAS_STATS = typeof PARTIDAS_STATS !== 'undefined' ? JSON.parse(JSON.stringify(PARTIDAS_STATS)) : [];
+
+            // Load DEFAULT_RECORDS_RAW if available (New architecture)
+            if (typeof DEFAULT_RECORDS_RAW !== 'undefined' && DEFAULT_RECORDS_RAW.length > 0) {
+                CUSTOM_RECORDS = DEFAULT_RECORDS_RAW.map(r => ({
+                    DuracionMinutos: r[0],
+                    NumPartidas: r[1],
+                    PlazaOrigen: MAP_PLAZA[r[2]],
+                    Fase: MAP_FASE[r[3]],
+                    FasePadre: MAP_FASE_PADRE[r[4]],
+                    ADR: MAP_ADR[r[5]],
+                    ADR_Binario: r[5],
+                    Dia_Grupo: MAP_DIA[r[6]],
+                    Dia_Binario: (r[6] === 3 || r[6] === 4) ? 1 : 0
+                }));
+                isCustomDatasetLoaded = true;
+                
+                // Hide custom upload header as it's the embedded default dataset
+                const customHeader = document.getElementById('customDataHeader');
+                if (customHeader) customHeader.style.display = 'none';
+                
+                // Hide upload section to keep it clean (they can still upload via devtools if needed, or we keep it)
+                const uploadContainer = document.getElementById('uploadButtonContainer');
+                if (uploadContainer) uploadContainer.style.display = 'none';
+            }
 
             // Render default plazas dynamically
             renderPlazaSelector(['ALC', 'BCN', 'VLC']);
@@ -2400,7 +2424,7 @@
             if (activeADR !== 'ALL') subset = subset.filter(r => r.ADR === activeADR);
             if (activeDia !== 'ALL') {
                 const arr = activeDia.split(',');
-                subset = subset.filter(r => arr.includes(r.Dia));
+                subset = subset.filter(r => arr.includes(r.Dia_Grupo));
             }
 
             const tbody = document.getElementById('partidasTableBody');
@@ -2958,7 +2982,7 @@
             // Intercept
             html += `
             <div class="coef-item">
-                <span class="coef-name"><i class="fa-solid fa-sliders" style="color: var(--primary);"></i> Intercepto Base ($\\beta_0$) - ${window.currentActiveDiasStr}</span>
+                <span class="coef-name"><i class="fa-solid fa-sliders" style="color: var(--primary);"></i> Intercepto Base ($\beta_0$) - ${window.currentActiveDiasStr}</span>
                 <span class="coef-value">${coef.Intercepto > 0 ? '+' : ''}${coef.Intercepto.toFixed(2)} min</span>
             </div>`;
 
@@ -2973,7 +2997,7 @@
             if (coef.Coef_Partidas !== null) {
                 html += `
                 <div class="coef-item">
-                    <span class="coef-name"><i class="fa-solid fa-boxes-stacked" style="color: var(--info);"></i> Coef. Partidas ($\\beta_1$) ${getSigBadge(coef.P_Value_Partidas)}</span>
+                    <span class="coef-name"><i class="fa-solid fa-boxes-stacked" style="color: var(--info);"></i> Coef. Partidas ($\beta_1$) ${getSigBadge(coef.P_Value_Partidas)}</span>
                     <span class="coef-value">${coef.Coef_Partidas > 0 ? '+' : ''}${coef.Coef_Partidas.toFixed(2)} min/partida</span>
                 </div>`;
             }
@@ -2981,7 +3005,7 @@
             // ADR
             html += `
             <div class="coef-item">
-                <span class="coef-name"><i class="fa-solid fa-triangle-exclamation" style="color: var(--error);"></i> Coef. Mercancía ADR ($\\beta_A$) ${getSigBadge(coef.P_Value_ADR)}</span>
+                <span class="coef-name"><i class="fa-solid fa-triangle-exclamation" style="color: var(--error);"></i> Coef. Mercancía ADR ($\beta_A$) ${getSigBadge(coef.P_Value_ADR)}</span>
                 <span class="coef-value">${coef.Coef_ADR > 0 ? '+' : ''}${coef.Coef_ADR.toFixed(2)} min</span>
             </div>`;
 
@@ -3011,10 +3035,10 @@
             // Rebuild LaTeX Formula
             let latexFormula = `Y = ${coef.Intercepto.toFixed(1)}`;
             if (coef.Coef_Partidas !== null) {
-                latexFormula += ` ${coef.Coef_Partidas >= 0 ? '+' : '-'} ${Math.abs(coef.Coef_Partidas).toFixed(1)} X_{\\text{part}}`;
+                latexFormula += ` ${coef.Coef_Partidas >= 0 ? '+' : '-'} ${Math.abs(coef.Coef_Partidas).toFixed(1)} X_{\text{part}}`;
             }
-            latexFormula += ` ${coef.Coef_ADR >= 0 ? '+' : '-'} ${Math.abs(coef.Coef_ADR).toFixed(1)} A_{\\text{adr}}`;
-            latexFormula += ` + \\Delta_{\\text{Día}}`;
+            latexFormula += ` ${coef.Coef_ADR >= 0 ? '+' : '-'} ${Math.abs(coef.Coef_ADR).toFixed(1)} A_{\text{adr}}`;
+            latexFormula += ` + \Delta_{\text{Día}}`;
 
             formulaContainer.innerHTML = `$$${latexFormula}$$`;
 
