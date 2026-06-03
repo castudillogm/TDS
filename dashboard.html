@@ -2345,11 +2345,20 @@
                 }));
                 isCustomDatasetLoaded = true;
                 
+                // Show the dashboard and hide the welcome screen!
+                const appBody = document.getElementById('dashboardAppBody');
+                const welcomeScreen = document.getElementById('welcomeScreen');
+                if (appBody) appBody.style.display = 'block';
+                if (welcomeScreen) welcomeScreen.style.display = 'none';
+
+                // Dynamically populate parent phases
+                updateFilterFasePadreDropdown(CUSTOM_RECORDS);
+                
                 // Hide custom upload header as it's the embedded default dataset
                 const customHeader = document.getElementById('customDataHeader');
                 if (customHeader) customHeader.style.display = 'none';
                 
-                // Hide upload section to keep it clean (they can still upload via devtools if needed, or we keep it)
+                // Hide upload section to keep it clean
                 const uploadContainer = document.getElementById('uploadButtonContainer');
                 if (uploadContainer) uploadContainer.style.display = 'none';
             }
