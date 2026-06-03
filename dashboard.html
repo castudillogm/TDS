@@ -1,0 +1,3202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TDS Logística - Consola Ejecutiva e Interactiva de Control de Muelle</title>
+    
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js and FontAwesome Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- MathJax for Elegant LaTeX rendering -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$']]
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* Modern Glassmorphic Dark Design System */
+        :root {
+            --bg-color: #0b0f19;
+            --bg-gradient: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 50%, #020617 100%);
+            --card-bg: rgba(17, 24, 39, 0.55);
+            --card-hover-bg: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.16);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            
+            /* Curated HSL Color Accents */
+            --primary: #3b82f6;          /* Blue */
+            --primary-rgb: 59, 130, 246;
+            --success: #10b981;          /* Emerald/Green */
+            --success-rgb: 16, 185, 129;
+            --error: #ef4444;            /* Red/Outliers */
+            --error-rgb: 239, 68, 68;
+            --warning: #f59e0b;          /* Amber */
+            --info: #06b6d4;             /* Cyan */
+            --purple: #8b5cf6;           /* Purple */
+            
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
+            --glow-primary: 0 0 20px rgba(59, 130, 246, 0.25);
+            --glow-success: 0 0 20px rgba(16, 185, 129, 0.25);
+            --glow-error: 0 0 20px rgba(239, 68, 68, 0.25);
+        }
+
+        /* Premium Light Theme overrides */
+        body.light-theme {
+            --bg-color: #f8fafc;
+            --bg-gradient: radial-gradient(circle at 50% 0%, #ffffff 0%, #f1f5f9 50%, #e2e8f0 100%);
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-hover-bg: rgba(255, 255, 255, 0.98);
+            --border-color: rgba(148, 163, 184, 0.18); /* softer, premium slate border */
+            --border-hover: rgba(148, 163, 184, 0.35);
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --shadow-premium: 0 10px 30px -12px rgba(15, 23, 42, 0.06), 0 4px 12px -4px rgba(15, 23, 42, 0.03);
+            
+            /* Curated Light HSL Color Accents for visual harmony & high readability */
+            --primary: #2563eb;          /* Deeper blue */
+            --primary-rgb: 37, 99, 235;
+            --success: #059669;          /* Deeper emerald */
+            --success-rgb: 5, 150, 105;
+            --error: #dc2626;            /* Deeper red */
+            --error-rgb: 220, 38, 38;
+            --warning: #d97706;          /* Deeper amber */
+            --info: #0891b2;             /* Deeper cyan */
+            --purple: #7c3aed;           /* Deeper purple */
+            
+            --glow-primary: 0 0 20px rgba(37, 99, 235, 0.12);
+            --glow-success: 0 0 20px rgba(5, 150, 105, 0.12);
+            --glow-error: 0 0 20px rgba(220, 38, 38, 0.12);
+        }
+
+        body.light-theme .header-title-area h1 {
+            background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        body.light-theme .kpi-value {
+            background: linear-gradient(to right, #0f172a, #334155);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        body.light-theme .kpi-card.card-accent-success .kpi-value {
+            background: linear-gradient(to right, #059669, #047857);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        body.light-theme .kpi-card.card-accent-error .kpi-value {
+            background: linear-gradient(to right, #dc2626, #b91c1c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        body.light-theme .modal-card {
+            background: rgba(255, 255, 255, 0.98) !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15) !important;
+        }
+
+        body.light-theme .filter-select {
+            background: rgba(255, 255, 255, 0.95);
+            color: #0f172a;
+            border-color: var(--border-color);
+        }
+
+        body.light-theme .filter-select option {
+            background: #ffffff;
+            color: #0f172a;
+        }
+
+        body.light-theme .sim-slider {
+            background: #cbd5e1;
+        }
+
+        body.light-theme .btn {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(148, 163, 184, 0.25);
+            color: #334155;
+        }
+
+        body.light-theme .btn:hover {
+            background: #ffffff;
+            border-color: rgba(148, 163, 184, 0.45);
+            color: #0f172a;
+        }
+
+        body.light-theme #welcomeScreen {
+            background: rgba(255, 255, 255, 0.8) !important;
+            border-color: rgba(148, 163, 184, 0.2) !important;
+            box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08) !important;
+        }
+
+        body.light-theme .plaza-btn {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(148, 163, 184, 0.25);
+            color: #475569;
+        }
+
+        body.light-theme .plaza-btn:hover {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(148, 163, 184, 0.4);
+            color: #0f172a;
+        }
+
+        body.light-theme .plaza-btn.active {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(8, 145, 178, 0.04));
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.08);
+        }
+
+        body.light-theme .regression-formula {
+            background: rgba(0, 0, 0, 0.02) !important;
+            border-color: rgba(148, 163, 184, 0.2) !important;
+            color: #0f172a !important;
+        }
+
+        body.light-theme .coef-item {
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(148, 163, 184, 0.08);
+        }
+
+        body.light-theme .coef-value {
+            color: #0f172a;
+        }
+
+        body.light-theme .prediction-result-box {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(241, 245, 249, 0.95) 100%) !important;
+            border-color: rgba(148, 163, 184, 0.2) !important;
+        }
+
+        body.light-theme .playbook-section .card {
+            background: rgba(0, 0, 0, 0.02) !important;
+            border-color: rgba(0, 0, 0, 0.06) !important;
+        }
+
+        body.light-theme .toast {
+            background: rgba(255, 255, 255, 0.98);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px -10px rgba(37, 99, 235, 0.15);
+            color: #0f172a;
+        }
+
+        body.light-theme .modal-overlay {
+            background: rgba(148, 163, 184, 0.3);
+        }
+
+        body.light-theme .loader-overlay {
+            background: rgba(241, 245, 249, 0.7);
+        }
+
+        body.light-theme .partidas-table tr.active-phase-row td {
+            background: rgba(37, 99, 235, 0.08) !important;
+            border-bottom: 1px solid rgba(37, 99, 235, 0.15) !important;
+            color: #0f172a !important;
+        }
+
+        body.light-theme .partidas-table tr.inactive-phase-row td {
+            opacity: 0.35;
+            filter: grayscale(100%);
+            color: var(--text-muted) !important;
+        }
+
+        /* Base Settings */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-color);
+            background-image: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+            overflow-x: hidden;
+            padding-bottom: 3rem;
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        /* Container Layout */
+        .container {
+            max-width: 96%;
+            width: 1720px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header Style */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .header-title-area {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--info));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 8px rgba(59, 130, 246, 0.4));
+        }
+
+        .header-title-area h1 {
+            font-size: 2rem;
+            background: linear-gradient(to right, #ffffff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin-top: 0.25rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Buttons & Badges */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            background: rgba(30, 41, 59, 0.4);
+        }
+
+        .btn:hover {
+            background: rgba(51, 65, 85, 0.7);
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #2563eb);
+            border: none;
+            box-shadow: var(--glow-primary);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--error), #dc2626);
+            border: none;
+            box-shadow: var(--glow-error);
+        }
+
+        .badge {
+            display: inline-flex;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .badge-error {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* Glass Cards */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-premium);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            background: var(--card-hover-bg);
+            border-color: var(--border-hover);
+            transform: translateY(-3px);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: transparent;
+            transition: var(--transition-smooth);
+        }
+
+        .card.card-accent-primary::before { background: linear-gradient(90deg, var(--primary), var(--info)); }
+        .card.card-accent-success::before { background: linear-gradient(90deg, var(--success), #34d399); }
+        .card.card-accent-error::before { background: linear-gradient(90deg, var(--error), #f87171); }
+        .card.card-accent-warning::before { background: linear-gradient(90deg, var(--warning), #fbbf24); }
+
+        .card-title {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title i {
+            color: var(--text-secondary);
+        }
+
+        /* Filters Section */
+        .filters-container {
+            margin-bottom: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .filter-select {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+            outline: none;
+            width: 100%;
+            font-size: 0.9rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.25);
+        }
+
+        .filter-select option {
+            background: #0f172a;
+            color: var(--text-primary);
+        }
+
+        /* Plaza buttons for Premium Feel */
+        .plaza-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .plaza-btn {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+            background: rgba(17, 24, 39, 0.4);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            text-align: center;
+        }
+
+        .plaza-btn:hover {
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+            background: rgba(30, 41, 59, 0.5);
+        }
+
+        .plaza-btn.active {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(6, 182, 212, 0.1));
+            border-color: var(--primary);
+            color: var(--text-primary);
+            box-shadow: var(--glow-primary);
+        }
+
+        /* KPIs Grid */
+        .kpis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 155px;
+            padding: 1.25rem;
+        }
+
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            font-family: 'Outfit', sans-serif;
+            margin-top: 0.25rem;
+            background: linear-gradient(to right, #ffffff, #e2e8f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .kpi-card.card-accent-success .kpi-value {
+            background: linear-gradient(to right, #34d399, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .kpi-card.card-accent-error .kpi-value {
+            background: linear-gradient(to right, #f87171, #ef4444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .kpi-footer {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* Charts Section Layout */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-container {
+            position: relative;
+            height: 320px;
+            width: 100%;
+        }
+
+        /* Progress Bar for Estándar vs Aberrante */
+        .stability-bar-container {
+            margin: 1rem 0;
+        }
+        .stability-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 0.4rem;
+        }
+        .stability-bar {
+            height: 10px;
+            border-radius: 5px;
+            background: var(--error);
+            overflow: hidden;
+            display: flex;
+        }
+        .stability-bar-fill {
+            height: 100%;
+            background: var(--success);
+            transition: width 1s ease-out;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+
+        /* Regression and Simulation Section */
+        .analisis-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .analisis-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .regression-formula {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px dashed var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin: 1rem 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80px;
+            font-size: 1.1rem;
+            overflow-x: auto;
+            color: var(--info);
+        }
+
+        .coef-list {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .coef-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.4rem;
+            background: rgba(30, 41, 59, 0.3);
+            font-size: 0.9rem;
+        }
+
+        .coef-name {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .coef-value {
+            font-family: monospace;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* Interactive Simulator */
+        .simulator-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            margin-top: 1.25rem;
+        }
+
+        .sim-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .sim-input-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .sim-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sim-slider {
+            flex: 1;
+            height: 6px;
+            background: #1e293b;
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .sim-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            transition: transform 0.1s;
+        }
+
+        .sim-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .sim-value-badge {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--primary);
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.4rem;
+            font-family: monospace;
+            font-weight: 700;
+            min-width: 45px;
+            text-align: center;
+        }
+
+        /* Toggle switches */
+        .switch-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+        }
+
+        .switch-label {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .switch-subtext {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            display: block;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #1e293b;
+            transition: .3s;
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--text-secondary);
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: rgba(59, 130, 246, 0.25);
+            border-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+            background-color: var(--primary);
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.8);
+        }
+
+        /* Prediction Output */
+        .prediction-result-box {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            text-align: center;
+            position: relative;
+            transition: var(--transition-smooth);
+        }
+
+        .prediction-result-box.normal {
+            border-color: var(--success);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+        }
+
+        .prediction-result-box.elevated {
+            border-color: var(--warning);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
+        }
+
+        .prediction-result-box.high {
+            border-color: var(--error);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);
+        }
+
+        .pred-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .pred-value {
+            font-size: 2.8rem;
+            font-weight: 800;
+            font-family: 'Outfit', sans-serif;
+            color: var(--info);
+            margin: 0.25rem 0;
+            line-height: 1;
+        }
+
+        .pred-formatted {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .pred-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+        }
+
+        .pred-status.status-normal {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+        .pred-status.status-elevated {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+        .pred-status.status-high {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--error);
+        }
+
+        /* Playbook Metodológico */
+        .playbook-card {
+            margin-top: 2rem;
+        }
+
+        .playbook-section {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .playbook-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .playbook-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .playbook-text p {
+            margin-bottom: 1rem;
+        }
+
+        .playbook-text ul {
+            list-style-type: none;
+            margin-left: 0;
+            margin-bottom: 1rem;
+        }
+
+        .playbook-text li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .playbook-text li::before {
+            content: "\f058";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: var(--info);
+        }
+
+        .alert-box {
+            background: rgba(245, 158, 11, 0.08);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        /* Tabs inside Playbook */
+        .tabs-header {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.75rem 1.25rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition-smooth);
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+            box-shadow: var(--glow-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        /* Notification Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--primary);
+            box-shadow: var(--glow-primary);
+            border-radius: 0.5rem;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 1000;
+            transform: translateY(150%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(12px);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Partidas Table Styling */
+        .partidas-table-container {
+            margin-top: 1rem;
+            overflow-x: auto;
+        }
+
+        .partidas-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        .partidas-table th {
+            padding: 0.6rem 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid var(--border-color);
+            white-space: nowrap;
+            text-align: center !important;
+        }
+
+        .partidas-table td {
+            padding: 0.6rem 0.8rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+            transition: var(--transition-smooth);
+            white-space: nowrap;
+            text-align: center !important;
+        }
+
+        .partidas-table tr {
+            transition: var(--transition-smooth);
+        }
+
+        .partidas-table tr:hover td {
+            background: rgba(59, 130, 246, 0.08);
+            color: var(--text-primary);
+        }
+
+        .partidas-table tr.highlighted td {
+            background: rgba(16, 185, 129, 0.15) !important;
+            border-bottom: 1px solid var(--success) !important;
+            color: var(--text-primary) !important;
+            font-weight: 600;
+        }
+
+        .partidas-table tr.active-phase-row td {
+            background: rgba(59, 130, 246, 0.15) !important;
+            border-left: 4px solid var(--primary);
+            font-weight: 600;
+        }
+
+        /* Inactive phase focus styling */
+        .partidas-table tr.inactive-phase-row td {
+            opacity: 0.4;
+            filter: grayscale(100%);
+            color: var(--text-muted) !important;
+        }
+
+        .partidas-table tr.inactive-phase-row:hover td {
+            background: transparent !important;
+        }
+
+        /* Printing Stylesheet */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+                font-size: 11pt;
+            }
+            .container {
+                max-width: 100%;
+                padding: 0;
+            }
+            .no-print, header, .plaza-selector, .filters-container, .simulator-panel, .tab-btn {
+                display: none !important;
+            }
+            .card {
+                background: white !important;
+                border: 1px solid #ddd !important;
+                box-shadow: none !important;
+                color: black !important;
+                page-break-inside: avoid;
+                margin-bottom: 2rem;
+                backdrop-filter: none !important;
+            }
+            .card::before {
+                display: none;
+            }
+            .kpi-value {
+                color: black !important;
+                -webkit-text-fill-color: initial !important;
+                background: none !important;
+            }
+            .tab-content {
+                display: block !important;
+                margin-bottom: 2rem;
+            }
+            .charts-row {
+                grid-template-columns: 1fr !important;
+            }
+            .chart-container {
+                max-height: 250px;
+            }
+            h1, h2, h3 {
+                color: black !important;
+            }
+            .playbook-section {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        /* Modal and Loader CSS Styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(2, 6, 23, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            width: 90%;
+            max-width: 650px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            background: rgba(17, 24, 39, 0.95) !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important;
+            padding: 1.5rem;
+        }
+
+        .modal-overlay.show .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            line-height: 1;
+        }
+
+        .modal-close-btn:hover {
+            color: var(--text-primary);
+        }
+
+        /* Loader Overlay */
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(2, 6, 23, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .loader-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .loader-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: var(--shadow-premium);
+            text-align: center;
+        }
+
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(59, 130, 246, 0.15);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: var(--glow-primary);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-theme');
+            }
+        })();
+    </script>
+
+    <div class="container">
+        
+        <!-- Header -->
+        <header>
+            <div class="header-title-area">
+                <i class="fa-solid fa-chart-line logo-icon"></i>
+                <div>
+                    <h1>TDS Logística: Consola de Control de Muelle</h1>
+                    <div class="header-subtitle">Optimización y Modelado de Muelles de Almacenes de Origen (Flujo Baleares)</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn no-print" id="btnThemeToggle" onclick="toggleTheme()">
+                    <i class="fa-solid fa-sun" id="themeIcon" style="color: var(--warning);"></i> <span id="themeText">Modo Claro</span>
+                </button>
+                <button class="btn no-print" onclick="window.print()">
+                    <i class="fa-solid fa-file-pdf"></i> Exportar Reporte
+                </button>
+                <button class="btn no-print" onclick="openExcelStructureModal()">
+                    <i class="fa-solid fa-table-cells"></i> Estructura Excel
+                </button>
+                <label class="btn btn-primary no-print" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-file-import"></i> Cargar Excel
+                    <input type="file" id="excelFileInput" accept=".xlsx, .xls" style="display: none;" onchange="handleExcelUpload(event)">
+                </label>
+                <button class="btn btn-danger no-print" id="btnResetDefault" style="display: none;" onclick="clearUploadedData()">
+                    <i class="fa-solid fa-square-xmark"></i> Limpiar Datos
+                </button>
+                <button class="btn btn-primary no-print" onclick="resetAllFilters()">
+                    <i class="fa-solid fa-rotate-left"></i> Restablecer Filtros
+                </button>
+            </div>
+        </header>
+
+        <!-- ====== PENDIENTE DE CARGAR EXCEL (PANTALLA DE BIENVENIDA PREMIUM) ====== -->
+        <div id="welcomeScreen" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5rem 2rem; border-radius: 1.2rem; background: rgba(17, 24, 39, 0.45); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: var(--shadow-premium); text-align: center; margin-top: 2rem; backdrop-filter: blur(16px); gap: 2rem;">
+            <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); display: flex; align-items: center; justify-content: center; box-shadow: var(--glow-success);">
+                <i class="fa-solid fa-file-excel" style="color: var(--success); font-size: 2.5rem;"></i>
+            </div>
+            <div style="max-width: 600px;">
+                <h2 style="font-size: 2rem; font-weight: 800; color: var(--text-primary); margin-bottom: 1rem; font-family: 'Outfit', sans-serif;">Consola de Análisis de Control de Muelle</h2>
+                <p style="font-size: 1rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 2rem;">
+                    Bienvenido a la plataforma premium de modelado matemático de TDS Logística. Para comenzar a analizar los tiempos de proceso, límites de Tukey, percentiles de flujo y coeficientes de regresión OLS multivariable en caliente, por favor carga tu archivo de datos de Excel (`.xlsx`, `.xls`).
+                </p>
+                <label class="btn btn-primary" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.9rem 2.2rem; font-size: 1.1rem; border-radius: 0.6rem; font-weight: 600; box-shadow: var(--glow-primary); transition: var(--transition-smooth);">
+                    <i class="fa-solid fa-file-import" style="font-size: 1.2rem;"></i> Cargar Archivo de Excel
+                    <input type="file" id="welcomeExcelFileInput" accept=".xlsx, .xls" style="display: none;" onchange="handleExcelUpload(event)">
+                </label>
+                <div style="margin-top: 1.5rem;">
+                    <a href="#" onclick="openExcelStructureModal(); return false;" style="color: var(--primary); font-size: 0.88rem; text-decoration: none; font-weight: 500; transition: var(--transition-smooth); display: inline-flex; align-items: center; gap: 0.4rem;">
+                        <i class="fa-solid fa-circle-info"></i> Ver estructura requerida del Excel
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div id="dashboardAppBody" style="display: none;">
+            <!-- Plaza Origen Selector (Horizontal Tabbed style for Premium UI) -->
+            <div class="no-print">
+                <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em;">Plaza de Origen</div>
+            <div class="plaza-selector" id="plazaSelectorContainer">
+                <button class="plaza-btn active" data-value="ALL"><i class="fa-solid fa-globe"></i> Todas las Plazas</button>
+                <button class="plaza-btn" data-value="ALC"><i class="fa-solid fa-warehouse"></i> Alicante (ALC)</button>
+                <button class="plaza-btn" data-value="BCN"><i class="fa-solid fa-warehouse"></i> Barcelona (BCN)</button>
+                <button class="plaza-btn" data-value="VLC"><i class="fa-solid fa-warehouse"></i> Valencia (VLC)</button>
+            </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="filters-container no-print">
+            <div class="filter-group" id="filterFasePadreGroup" style="display: none;">
+                <label for="filterFasePadre"><i class="fa-solid fa-folder-tree"></i> Fase Padre</label>
+                <select id="filterFasePadre" class="filter-select" onchange="updateDashboard()">
+                    <option value="ALL">Todas las Fases Padres</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="filterFase"><i class="fa-solid fa-arrows-spin"></i> Fase del Proceso</label>
+                <select id="filterFase" class="filter-select" onchange="updateDashboard()">
+                    <option value="ALL">Todas las Fases</option>
+                    <option value="RECEPCION MERCANCIA ALMACEN ORIGEN">Recepción Mercancía Almacén</option>
+                    <option value="CARGA ALMACEN ORIGEN">Carga / Estiba de Contenedor</option>
+                    <option value="DOCUMENTACION">Fase Documental (Aduana/SLA)</option>
+                    <option value="BAJADA MUELLE ORIGEN">Bajada Muelle (Transito Puerto)</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="filterDia"><i class="fa-solid fa-calendar-day"></i> Segregación de Días (Ctrl+Click)</label>
+                <select id="filterDia" class="filter-select" multiple size="5" style="height: auto; padding: 0.5rem;" onchange="updateDashboard()">
+                    <option value="ALL" selected>Todos los Días</option>
+                    <option value="Lunes">Lunes</option>
+                    <option value="Martes">Martes</option>
+                    <option value="Miércoles">Miércoles</option>
+                    <option value="Jueves">Jueves</option>
+                    <option value="Viernes">Viernes</option>
+                    <option value="Sábado">Sábado</option>
+                    <option value="Domingo">Domingo</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="filterADR"><i class="fa-solid fa-triangle-exclamation"></i> Mercancía Peligrosa (ADR)</label>
+                <select id="filterADR" class="filter-select" onchange="updateDashboard()">
+                    <option value="ALL">Todas las Cargas</option>
+                    <option value="SI">Sólo ADR (Mercancía Peligrosa)</option>
+                    <option value="NO">Sin ADR (Mercancía Común)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- ====== KPIs COMPACTOS (FILA SUPERIOR COMPLETA) ====== -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="card kpi-card card-accent-primary" style="min-height: 120px;">
+                <div class="card-title" style="font-size: 0.95rem;">
+                    <span>Total Registros</span>
+                    <i class="fa-solid fa-database"></i>
+                </div>
+                <div class="kpi-value" id="kpiTotal" style="font-size: 1.8rem;">--</div>
+                <div class="kpi-footer"><i class="fa-solid fa-circle-info"></i> Consolidados</div>
+            </div>
+
+            <div class="card kpi-card card-accent-success" style="min-height: 120px;">
+                <div class="card-title" style="font-size: 0.95rem;">
+                    <span>Datos Estándar</span>
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <div class="kpi-value" id="kpiEstandarPct" style="font-size: 1.8rem;">--%</div>
+                <div class="kpi-footer"><span id="kpiEstandarCount">--</span> limpios</div>
+            </div>
+
+            <div class="card kpi-card card-accent-error" style="min-height: 120px;">
+                <div class="card-title" style="font-size: 0.95rem;">
+                    <span>Aberrantes</span>
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </div>
+                <div class="kpi-value" id="kpiAberrantePct" style="font-size: 1.8rem;">--%</div>
+                <div class="kpi-footer"><span id="kpiAberranteCount">--</span> outliers</div>
+            </div>
+
+            <div class="card kpi-card card-accent-warning" style="min-height: 120px;">
+                <div class="card-title" style="font-size: 0.95rem;">
+                    <span>Tukey Actual</span>
+                    <i class="fa-solid fa-arrows-left-right"></i>
+                </div>
+                <div class="kpi-value" id="kpiTukey" style="font-size: 1.8rem;">-- min</div>
+                <div class="kpi-footer"><i class="fa-solid fa-shield-halved"></i> Filtro activo</div>
+            </div>
+        </div>
+
+        <!-- ====== TIEMPOS DE PROCESO LIMPIO (FILA MEDIA COMPLETA) ====== -->
+        <div class="card card-accent-success" style="margin-bottom: 1.5rem;">
+            <div class="card-title" style="margin-bottom: 0.75rem;">
+                <span>Tiempos de Proceso Limpio (Datos Estándar)</span>
+                <i class="fa-solid fa-stopwatch"></i>
+            </div>
+            <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 1rem;">
+                <i class="fa-solid fa-filter"></i> Solo datos estándar (excluyendo registros aberrantes)
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+                <!-- Mejor Caso -->
+                <div style="display: flex; align-items: center; gap: 1rem; padding: 0.9rem 1rem; border-radius: 0.6rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2);">
+                    <div style="width: 42px; height: 42px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fa-solid fa-bolt" style="color: var(--success); font-size: 1.1rem;"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 0.75rem; color: var(--success); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;">Mejor Caso (Q1)</div>
+                        <div id="kpiMinLimpio" style="font-size: 1.6rem; font-weight: 800; font-family: 'Outfit', sans-serif; color: #34d399; line-height: 1.2;">-- min</div>
+                    </div>
+                </div>
+
+                <!-- Caso Medio -->
+                <div style="display: flex; align-items: center; gap: 1rem; padding: 0.9rem 1rem; border-radius: 0.6rem; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2);">
+                    <div style="width: 42px; height: 42px; border-radius: 50%; background: rgba(59, 130, 246, 0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fa-solid fa-calculator" style="color: var(--primary); font-size: 1.1rem;"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 0.75rem; color: var(--primary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;">Caso Común (Mediana - Q2)</div>
+                        <div id="kpiMediaLimpia" style="font-size: 1.6rem; font-weight: 800; font-family: 'Outfit', sans-serif; color: #60a5fa; line-height: 1.2;">-- min</div>
+                    </div>
+                </div>
+
+                <!-- Peor Caso -->
+                <div style="display: flex; align-items: center; gap: 1rem; padding: 0.9rem 1rem; border-radius: 0.6rem; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2);">
+                    <div style="width: 42px; height: 42px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fa-solid fa-circle-exclamation" style="color: var(--error); font-size: 1.1rem;"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 0.75rem; color: var(--error); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;">Peor Caso (P95)</div>
+                        <div id="kpiMaxLimpio" style="font-size: 1.6rem; font-weight: 800; font-family: 'Outfit', sans-serif; color: #f87171; line-height: 1.2;">-- min</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====== TABLA DE ESTABILIDAD POR FASE (ANCHO COMPLETO) ====== -->
+        <div class="card card-accent-warning" style="margin-bottom: 2rem;">
+            <div class="card-title">
+                <span>Límite de Tukey por Fase del Proceso</span>
+                <span class="badge badge-success">Datos Limpios</span>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">
+                Umbral máximo de estabilidad ($Q_3 + 1.5 \times IQR$) calculado para cada fase de la plaza y filtros seleccionados. Los registros por encima de este umbral se consideran aberrantes.
+            </p>
+            <div class="partidas-table-container">
+                <table class="partidas-table" id="tukeyPhaseTable">
+                    <thead>
+                        <tr>
+                            <th>Fase del Proceso</th>
+                            <th style="text-align: right;">Registros Totales</th>
+                            <th style="text-align: right;">Límite Tukey ($L_{\text{Tukey}}$)</th>
+                            <th style="text-align: right;">Datos Usados (Limpios)</th>
+                            <th style="text-align: right;">Datos Excluidos (Aberrantes)</th>
+                            <th style="text-align: right;">Mejor Caso (Q1)</th>
+                            <th style="text-align: right;">Caso Común (Mediana)</th>
+                            <th style="text-align: right;">Peor Caso (P95)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tukeyPhaseTableBody">
+                        <!-- Dynamically loaded -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Main Chart Section and Stability breakdown -->
+        <div class="charts-row">
+            <div class="card card-accent-primary">
+                <div class="card-title">
+                    <span>Análisis de Tiempos y Dispersión del Flujo</span>
+                    <span class="badge badge-success">Métricas Limpias</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="mainChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card card-accent-warning">
+                <div class="card-title">
+                    <span>Segregación de Calidad del Registro</span>
+                    <i class="fa-solid fa-scale-balanced"></i>
+                </div>
+                
+                <div class="stability-bar-container">
+                    <div class="stability-labels">
+                        <span style="color: var(--success); font-weight: 600;"><i class="fa-solid fa-square-poll-vertical"></i> Estándar</span>
+                        <span style="color: var(--error); font-weight: 600;">Aberrante (Ruido WMS) <i class="fa-solid fa-bug"></i></span>
+                    </div>
+                    <div class="stability-bar">
+                        <div id="stabilityBarFill" class="stability-bar-fill" style="width: 50%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                        <span id="barEstPct">50%</span>
+                        <span id="barAberPct">50%</span>
+                    </div>
+                </div>
+
+                <div class="chart-container" style="height: 180px;">
+                    <canvas id="stabilityDonutChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Segregación por Partidas Section -->
+        <div class="card card-accent-primary" style="margin-bottom: 2rem;">
+            <div class="card-title">
+                <span>Análisis General de Tiempos Segregado por Partidas Físicas</span>
+                <i class="fa-solid fa-boxes-stacked"></i>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; margin-top: 1rem;">
+                <div class="playbook-text" style="display: flex; flex-direction: column; justify-content: center;">
+                    <p><strong>Impacto de la Complejidad del Envío (Partidas):</strong></p>
+                    <p>Esta tabla muestra cómo varía la duración neta del proceso en función de la cantidad de partidas asociadas en cada carga. A medida que se incrementa el número de partidas, el caso medio (media limpia) y el peor caso (máximo limpio) se elevan de forma gradual, debido al esfuerzo adicional de descarga, lectura y validación en muelle.</p>
+                    <div class="alert-box" style="margin-top: 1rem; background: rgba(59, 130, 246, 0.08); border-left-color: var(--primary);">
+                        <i class="fa-solid fa-circle-info" style="color: var(--info); margin-right: 0.5rem;"></i>
+                        <strong>Consejo Interactivo:</strong> Mueve el slider de partidas en el Simulador de abajo y verás cómo se resalta automáticamente la fila correspondiente en esta tabla para comparar las predicciones con el comportamiento histórico real.
+                    </div>
+                </div>
+                <div class="partidas-table-container">
+                    <table class="partidas-table">
+                        <thead>
+                            <tr>
+                                <th>Nº Partidas</th>
+                                <th style="text-align: right;">Total Registros</th>
+                                <th style="text-align: right;">Datos Estándar</th>
+                                <th style="text-align: right;">Mejor Caso (Q1)</th>
+                                <th style="text-align: right;">Caso Común (Mediana)</th>
+                                <th style="text-align: right;">Peor Caso (P95)</th>
+                                <th style="text-align: right;">Umbral Tukey</th>
+                            </tr>
+                        </thead>
+                        <tbody id="partidasTableBody">
+                            <!-- Rows will be dynamically loaded from dashboard_data_v2.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Predictive Modeling and Linear Regression -->
+        <div class="analisis-grid" id="predictiveModelingSection">
+            
+            <!-- Regression Model Display -->
+            <div class="card card-accent-primary">
+                <div class="card-title">
+                    <span>Modelo de Regresión Multivariable (OLS)</span>
+                    <i class="fa-solid fa-square-root-variable"></i>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                    Representación científica basada en datos históricos curados mediante Mínimos Cuadrados Ordinarios (OLS). El modelo aísla el impacto neto de partidas, días de alta demanda y mercancía peligrosa (ADR).
+                </p>
+                
+                <div class="regression-formula" id="formulaContainer">
+                    $$Y_{\text{duración}} = \beta_0 + \beta_1 X_{\text{partidas}} + \beta_2 D_{\text{día}} + \beta_3 A_{\text{adr}}$$
+                </div>
+
+                <div class="coef-list" id="coefList">
+                    <!-- Dynamic Coefficients will appear here -->
+                </div>
+                
+                <div class="alert-box" id="regressionNote" style="display: none;">
+                    <i class="fa-solid fa-circle-info"></i> <strong>Nota de Trazabilidad:</strong> La fase de Documentación no se ve afectada físicamente por las partidas, por lo que el coeficiente $\beta_1$ se excluye. La Bajada de Muelle se procesa de forma externa y depende del zarpe marítimo directo, por lo que no cuenta con coeficientes lineales estables.
+                </div>
+            </div>
+
+            <!-- Interactive Predictor Simulator -->
+            <div class="card card-accent-success simulator-panel">
+                <div class="card-title">
+                    <span>Simulador de Tiempos de Muelle (Predicción)</span>
+                    <i class="fa-solid fa-gamepad"></i>
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                    Configura las variables operativas en tiempo real para predecir la duración del muelle limpio basándose en los coeficientes estadísticos calculados.
+                </p>
+
+                <div class="simulator-inputs">
+                    <div class="sim-input-group" id="simPartidasGroup">
+                        <label>
+                            <span>Cantidad de Partidas Físicas (X)</span>
+                            <span class="sim-value-badge" id="simPartidasVal">1</span>
+                        </label>
+                        <div class="sim-slider-container">
+                            <input type="range" min="1" max="15" value="1" class="sim-slider" id="simPartidas" oninput="calculatePrediction()">
+                        </div>
+                    </div>
+
+                    <div class="switch-container">
+                        <div>
+                            <span class="switch-label">Día de Alta Demanda (D)</span>
+                            <span class="switch-subtext">Jueves o Viernes (Presión del Ferry)</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="simDiaPico" onchange="calculatePrediction()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="switch-container">
+                        <div>
+                            <span class="switch-label">Mercancía Peligrosa / ADR (A)</span>
+                            <span class="switch-subtext">Requiere etiquetado IMDG y trincado especial</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="simADR" onchange="calculatePrediction()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="prediction-result-box normal" id="predictionResultBox">
+                    <div class="pred-label">Predicción Estimada de Proceso Limpio</div>
+                    <div class="pred-value" id="predictionValue">-- min</div>
+                    <div class="pred-formatted" id="predictionValueFormatted">--</div>
+                    <div class="pred-status status-normal" id="predictionStatus">
+                        <i class="fa-solid fa-check-double"></i> Proceso Eficiente
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Playbook Metodológico / Executive Insights -->
+        <div class="card card-accent-warning playbook-card">
+            <div class="card-title">
+                <span>Playbook de Inteligencia de Negocio y Metodología</span>
+                <i class="fa-solid fa-book-open"></i>
+            </div>
+            
+            <div class="tabs-header">
+                <button class="tab-btn active" onclick="switchTab(event, 'tabTukey')">Metodología Tukey</button>
+                <button class="tab-btn" onclick="switchTab(event, 'tabInsights')">Hallazgos Logísticos (Insights)</button>
+                <button class="tab-btn" onclick="switchTab(event, 'tabRegresion')">Fórmula OLS</button>
+            </div>
+
+            <!-- Tab 1: Tukey -->
+            <div id="tabTukey" class="tab-content active">
+                <div class="playbook-section">
+                    <div class="playbook-text">
+                        <p><strong>Limpieza de Datos mediante Límites de Tukey:</strong></p>
+                        <p>Para evitar que retrasos sistemáticos (sesiones RF que los operarios olvidan cerrar en el sistema ERP durante horas o días) alteren las métricas, se aplica una metodología estadística robusta no paramétrica basada en cuartiles en lugar de desviación estándar.</p>
+                        <p>El Rango Intercuartílico (IQR) mide la dispersión del 50% central de los datos. La valla superior o <strong>Límite de Tukey</strong> define el umbral a partir del cual un registro es considerado ruido/error sistémico:</p>
+                        <ul>
+                            <li><strong>$Q1$ (Cuartil 1):</strong> 25% de los datos duran menos que este valor.</li>
+                            <li><strong>$Q2$ (Mediana):</strong> Valor central de la muestra.</li>
+                            <li><strong>$Q3$ (Cuartil 3):</strong> 75% de los datos duran menos que este valor.</li>
+                            <li><strong>$IQR$:</strong> $Q3 - Q1$.</li>
+                        </ul>
+                    </div>
+                    <div class="card" style="background: rgba(15, 23, 42, 0.4); border-color: rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1.5rem;">
+                        <p style="font-weight: 600; color: var(--warning); margin-bottom: 0.5rem; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em;">Cálculo Metodológico</p>
+                        <div style="font-size: 1.25rem; font-family: serif; color: var(--text-primary); text-align: center; margin: 1rem 0;">
+                            $$\text{Rango Intercuartílico: } IQR = Q_3 - Q_1$$
+                            $$\text{Umbral de Estabilidad (Tukey): } L_{\text{Tukey}} = Q_3 + 1.5 \times IQR$$
+                        </div>
+                        <p style="font-size: 0.8rem; color: var(--text-secondary); text-align: center; max-width: 320px;">
+                            Todo registro con $Duración > L_{\text{Tukey}}$ se cataloga como <strong>Aberrante</strong> y se segrega automáticamente del flujo de análisis limpio.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Insights -->
+            <div id="tabInsights" class="tab-content">
+                <div class="playbook-section" style="grid-template-columns: 1.1fr 1fr;">
+                    <div class="playbook-text">
+                        <p><strong>Hallazgos Operativos de Muelle Auditado:</strong></p>
+                        <p>El análisis de la serie de exportaciones revela comportamientos estructurales clave del negocio:</p>
+                        <p><strong>1. Recepción y Volumétrica (Fase 1):</strong> Muestra una correlación lineal casi nula ($r \approx 0.06 - 0.10$) entre el número de partidas y la duración en Barcelona y Valencia. El cuello de botella es la descarga, no el peso/medición. Sin embargo, <strong>Alicante (ALC)</strong> colapsa los Jueves y Viernes aumentando su tiempo medio limpio en más de 43 minutos ($+43.39\text{ min}$), sugiriendo saturación física de layout.</p>
+                        <p><strong>2. Tramitación Administrativa (Fase 2):</strong> La validación de declaraciones de mercancías peligrosas (ADR) ante la aduana y naviera genera una pérdida severa de trazabilidad. En BCN, la presencia de ADR añade un costo neto administrativo de 48 minutos y desploma la tasa de rescate estándar a tiempo del $92\%$ a un crítico $35\%$.</p>
+                        <p><strong>3. Carga en Almacén y Estiba (Fase 3):</strong> Durante los días pico (J-V) se produce el fenómeno de la "presión del ferry". Para no perder el zarpe del barco del fin de semana, la estiba física se acelera, reduciendo la duración del proceso en BCN en casi 2 horas, pero a costo de disparar los errores de registro (olvidos de lectura de radiofrecuencia) del $7.5\%$ al $20.27\%$ de outliers.</p>
+                    </div>
+                    <div class="playbook-text">
+                        <p><strong>4. Bajada a Muelle (Fase 4):</strong> Los tiempos reportados en esta fase por el ERP sufren distorsión de terceros. El ERP cierra la transacción basándose en la salida oficial del ferry de la terminal, por lo que el tiempo de espera terrestre en puerto se infla artificialmente hasta el zarpe del barco, ocultando el rendimiento neto del transportista.</p>
+                        <div class="alert-box" style="margin-top: 1rem;">
+                            <i class="fa-solid fa-triangle-exclamation" style="color: var(--warning); margin-right: 0.5rem;"></i>
+                            <strong>Recomendación Ejecutiva:</strong> Rediseñar reglas de control en WMS para obligar la lectura final de volumétrica RF en Barcelona, y optimizar ventanas horarias de descarga con slots fijos para Alicante.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: OLS Regression Formula -->
+            <div id="tabRegresion" class="tab-content">
+                <div class="playbook-section">
+                    <div class="playbook-text">
+                        <p><strong>Modelado de Regresión por Mínimos Cuadrados Ordinarios (OLS):</strong></p>
+                        <p>Se utiliza una regresión lineal con variables categóricas (dummies) para predecir la duración del muelle limpio:</p>
+                        <p>$$\hat{Y} = \beta_0 + \beta_1 X_{\text{Partidas}} + \beta_2 D_{\text{Día}} + \beta_3 A_{\text{ADR}}$$</p>
+                        <p>Donde las variables se codifican de la siguiente manera:</p>
+                        <ul>
+                            <li><strong>$X_{\text{Partidas}}$:</strong> Variable cuantitativa del número total de partidas físicas.</li>
+                            <li><strong>$D_{\text{Día}}$:</strong> Variable binaria temporal ($0$ para días ordinarios L-X, $1$ para días pico de ferry J-V).</li>
+                            <li><strong>$A_{\text{ADR}}$:</strong> Variable binaria de seguridad ($0$ para carga general, $1$ para mercancía peligrosa ADR).</li>
+                            <li><strong>$\beta_0$ (Intercepto):</strong> Tiempo muerto fijo de preparación, acople y tramitación inicial.</li>
+                            <li><strong>$\beta_n$:</strong> Coeficiente de impacto marginal neto para cada factor correspondiente.</li>
+                        </ul>
+                    </div>
+                    <div class="card" style="background: rgba(15, 23, 42, 0.4); border-color: rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1.5rem;">
+                        <p style="font-weight: 600; color: var(--info); margin-bottom: 0.5rem; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em;">Alineación de Variables</p>
+                        <div style="font-size: 1rem; color: var(--text-primary); text-align: left; width: 100%; margin: 0.5rem 0; line-height: 1.8;">
+                            <div><span style="color: var(--primary);">$\beta_0$</span>: Tiempo Base (Constante)</div>
+                            <div><span style="color: var(--primary);">$\beta_1$</span>: Impacto de añadir 1 Partida adicional</div>
+                            <div><span style="color: var(--primary);">$\beta_2$</span>: Impacto neto de días pico (Jueves-Viernes)</div>
+                            <div><span style="color: var(--primary);">$\beta_3$</span>: Impacto neto de Carga Peligrosa (ADR)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        </div> <!-- end dashboardAppBody -->
+
+    </div>
+
+    <!-- Notification Toast for interactive feedback -->
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-circle-check" style="color: var(--success); font-size: 1.2rem;"></i>
+        <div id="toastMessage" style="color: var(--text-primary); font-size: 0.9rem; font-weight: 500;">Filtros actualizados con éxito</div>
+    </div>
+
+    <!-- Load SheetJS CDN for client-side Excel parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Load the autogenerated JS data file -->
+    <script src="dashboard_data_v2.js"></script>
+
+    <script>
+        // Helper to format numbers cleanly with exactly 'dec' decimals (including .00 for integers)
+        function formatNum(val, dec = 2) {
+            if (val === undefined || val === null || isNaN(val)) return '--';
+            const num = Number(val);
+            return num.toLocaleString(undefined, { minimumFractionDigits: dec, maximumFractionDigits: dec });
+        }
+
+        // Pure JavaScript MD5 algorithm (matches RFC 1321 and Python's hashlib.md5)
+        function md5(str) {
+            var k = [], i = 0;
+            for (; i < 64; ) k[i] = 0 | Math.abs(Math.sin(++i)) * 4294967296;
+            var s = [7, 12, 17, 22, 5, 9, 14, 20, 4, 11, 16, 23, 6, 10, 15, 21];
+            var b = [0, 1, 2, 3];
+            var h = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476];
+            var words = [];
+            str = unescape(encodeURIComponent(str));
+            for (var len = str.length, j = 0; j < len; j++) words[j >> 2] |= str.charCodeAt(j) << ((j % 4) * 8);
+            words[len >> 2] |= 0x80 << ((len % 4) * 8);
+            words[(((len + 8) >> 6) << 4) + 14] = len * 8;
+            for (var j = 0; j < words.length; j += 16) {
+                var a = h.slice(0);
+                for (var i = 0; i < 64; i++) {
+                    var f, g;
+                    if (i < 16) { f = (a[1] & a[2]) | (~a[1] & a[3]); g = i; }
+                    else if (i < 32) { f = (a[3] & a[1]) | (~a[3] & a[2]); g = (5 * i + 1) % 16; }
+                    else if (i < 48) { f = a[1] ^ a[2] ^ a[3]; g = (3 * i + 5) % 16; }
+                    else { f = a[2] ^ (a[1] | ~a[3]); g = (7 * i) % 16; }
+                    var temp = a[3];
+                    a[3] = a[2];
+                    a[2] = a[1];
+                    var val = a[0] + f + k[i] + (words[j + g] || 0);
+                    var shift = s[(i >> 4) * 4 + (i % 4)];
+                    a[1] = a[1] + ((val << shift) | (val >>> (32 - shift)));
+                    a[0] = temp;
+                }
+                for (var i = 0; i < 4; i++) h[i] += a[i];
+            }
+            for (var out = '', i = 0; i < 4; i++) {
+                for (var j = 0; j < 4; j++) {
+                    out += ((h[i] >> (j * 8)) & 0xff).toString(16).padStart(2, '0');
+                }
+            }
+            return out;
+        }
+
+        // Get weekday index deterministically from Codigo hash
+        function getDayIntFromCodigo(codigo) {
+            if (!codigo) return 0;
+            const hash = md5(codigo.toString().trim());
+            const hex8 = hash.substring(0, 8);
+            const h = parseInt(hex8, 16);
+            return h % 5; // 0: Lunes, 1: Martes, etc.
+        }
+
+        // Get actual weekday index (0-6) from FechaExpedicion string
+        function getDayIntFromFecha(fechaStr) {
+            if (fechaStr === undefined || fechaStr === null) return 0;
+            try {
+                const cleanStr = fechaStr.toString().trim();
+                const datePart = cleanStr.split(' ')[0]; // Take "260112"
+                if (datePart.length >= 6) {
+                    const yy = parseInt(datePart.substring(0, 2));
+                    const mm = parseInt(datePart.substring(2, 4)) - 1; // 0-indexed in JS
+                    const dd = parseInt(datePart.substring(4, 6));
+                    
+                    if (!isNaN(yy) && !isNaN(mm) && !isNaN(dd)) {
+                        const date = new Date(2000 + yy, mm, dd);
+                        const jsDay = date.getDay(); // 0: Sunday, 1: Monday, ...
+                        return jsDay === 0 ? 6 : jsDay - 1; // Map Sunday to 6, others to jsDay-1
+                    }
+                }
+            } catch (err) {
+                console.error("Error parsing FechaExpedicion:", err);
+            }
+            return 0; // Fallback to Monday
+        }
+
+        // Percentile function (interpolates values like pandas/numpy)
+        function getPercentile(arr, q) {
+            if (arr.length === 0) return 0;
+            const sorted = arr.slice().sort((a, b) => a - b);
+            const pos = (sorted.length - 1) * q;
+            const base = Math.floor(pos);
+            const rest = pos - base;
+            if (sorted[base + 1] !== undefined) {
+                return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+            } else {
+                return sorted[base];
+            }
+        }
+
+        // Calculates Q1, Mediana, Q3, IQR, Tukey Limit, Min(P5), Mean, Max for a numeric array
+        function calculateTukeyStats(durations) {
+            if (durations.length === 0) {
+                return {
+                    Total: 0, Limpios: 0, Aberrantes: 0, PctLimpios: 0, PctAberrantes: 0,
+                    Q1: 0, Mediana: 0, Q3: 0, IQR: 0, LimiteTukey: 0, MinLimpio: 0, MediaLimpia: 0, MaxLimpio: 0
+                };
+            }
+            
+            const total = durations.length;
+            const q1 = getPercentile(durations, 0.25);
+            const mediana = getPercentile(durations, 0.50);
+            const q3 = getPercentile(durations, 0.75);
+            const iqr = q3 - q1;
+            const limTukey = q3 + 1.5 * iqr;
+            
+            const cleanDurations = durations.filter(d => d <= limTukey);
+            const limpiosCount = cleanDurations.length;
+            const aberrantesCount = total - limpiosCount;
+            
+            const pctLimpios = parseFloat(((limpiosCount / total) * 100).toFixed(2));
+            const pctAberrantes = parseFloat((100 - pctLimpios).toFixed(2));
+            
+            const minLimpio = limpiosCount > 0 ? getPercentile(cleanDurations, 0.05) : 0;
+            const mediaLimpia = limpiosCount > 0 ? (cleanDurations.reduce((sum, val) => sum + val, 0) / limpiosCount) : 0;
+            const maxLimpio = limpiosCount > 0 ? getPercentile(cleanDurations, 0.95) : 0;
+            
+            return {
+                Total: total,
+                Limpios: limpiosCount,
+                Aberrantes: aberrantesCount,
+                PctLimpios: pctLimpios,
+                PctAberrantes: pctAberrantes,
+                Q1: q1,
+                Mediana: mediana,
+                Q3: q3,
+                IQR: iqr,
+                LimiteTukey: limTukey,
+                MinLimpio: minLimpio,
+                MediaLimpia: mediaLimpia,
+                MaxLimpio: maxLimpio
+            };
+        }
+
+        // Gauss-Jordan solver for N x N matrix M and N x 1 vector V
+        function solveLinearSystem(M, V) {
+            const n = V.length;
+            const A = [];
+            for (let i = 0; i < n; i++) {
+                A.push([...M[i], V[i]]);
+            }
+            
+            for (let i = 0; i < n; i++) {
+                let maxEl = Math.abs(A[i][i]);
+                let maxRow = i;
+                for (let k = i + 1; k < n; k++) {
+                    if (Math.abs(A[k][i]) > maxEl) {
+                        maxEl = Math.abs(A[k][i]);
+                        maxRow = k;
+                    }
+                }
+                
+                // Swap rows
+                for (let k = i; k < n + 1; k++) {
+                    const tmp = A[maxRow][k];
+                    A[maxRow][k] = A[i][k];
+                    A[i][k] = tmp;
+                }
+                
+                if (Math.abs(A[i][i]) < 1e-12) {
+                    return null; // Singular matrix
+                }
+                
+                // Zero out columns below A[i][i]
+                for (let k = i + 1; k < n; k++) {
+                    const c = -A[k][i] / A[i][i];
+                    for (let j = i; j < n + 1; j++) {
+                        if (i === j) {
+                            A[k][j] = 0;
+                        } else {
+                            A[k][j] += c * A[i][j];
+                        }
+                    }
+                }
+            }
+            
+            // Back substitution
+            const x = new Array(n).fill(0);
+            for (let i = n - 1; i >= 0; i--) {
+                x[i] = A[i][n] / A[i][i];
+                for (let k = i - 1; k >= 0; k--) {
+                    A[k][n] -= A[k][i] * x[i];
+                }
+            }
+            return x;
+        }
+
+        // Ordinary Least Squares multivariable regression solver
+        function fitOLS(cleanData, hasPartidas) {
+            if (cleanData.length < 10) return null;
+            
+            const numVars = hasPartidas ? 4 : 3;
+            const M = [];
+            for (let i = 0; i < numVars; i++) {
+                M.push(new Array(numVars).fill(0));
+            }
+            const V = new Array(numVars).fill(0);
+            
+            for (let i = 0; i < cleanData.length; i++) {
+                const r = cleanData[i];
+                const y = r.DuracionMinutos;
+                
+                let x = [];
+                if (hasPartidas) {
+                    x = [1.0, parseFloat(r.NumPartidas) || 0, r.Dia_Binario, r.ADR_Binario];
+                } else {
+                    x = [1.0, r.Dia_Binario, r.ADR_Binario];
+                }
+                
+                for (let j = 0; j < numVars; j++) {
+                    for (let k = 0; k < numVars; k++) {
+                        M[j][k] += x[j] * x[k];
+                    }
+                    V[j] += x[j] * y;
+                }
+            }
+            
+            const beta = solveLinearSystem(M, V);
+            if (!beta) return null;
+            
+            const yValues = cleanData.map(r => r.DuracionMinutos);
+            const ySum = yValues.reduce((sum, v) => sum + v, 0);
+            const yMean = ySum / yValues.length;
+            
+            let totalSS = 0;
+            let residualSS = 0;
+            
+            for (let i = 0; i < cleanData.length; i++) {
+                const r = cleanData[i];
+                const y = r.DuracionMinutos;
+                
+                let pred = beta[0];
+                if (hasPartidas) {
+                    pred += beta[1] * (parseFloat(r.NumPartidas) || 0) + beta[2] * r.Dia_Binario + beta[3] * r.ADR_Binario;
+                } else {
+                    pred += beta[1] * r.Dia_Binario + beta[2] * r.ADR_Binario;
+                }
+                
+                totalSS += (y - yMean) * (y - yMean);
+                residualSS += (y - pred) * (y - pred);
+            }
+            
+            const r2 = totalSS > 0 ? (1 - (residualSS / totalSS)) : 0.0;
+            
+            return {
+                Intercept: beta[0],
+                CoefPartidas: hasPartidas ? beta[1] : null,
+                CoefDia: hasPartidas ? beta[2] : beta[1],
+                CoefADR: hasPartidas ? beta[3] : beta[2],
+                R2: Math.min(1.0, Math.max(0.0, r2))
+            };
+        }
+
+        // Backups of original precalculated data
+        let ORIGINAL_DASHBOARD_STATS = null;
+        let ORIGINAL_REGRESIONES_STATS = null;
+        let ORIGINAL_PARTIDAS_STATS = null;
+
+        // Custom big-data analytics engine globals
+        let isCustomDatasetLoaded = false;
+        let CUSTOM_RECORDS = [];
+
+        // Modal triggers
+        function openExcelStructureModal() {
+            document.getElementById('excelStructureModal').classList.add('show');
+        }
+
+        function closeExcelStructureModal() {
+            document.getElementById('excelStructureModal').classList.remove('show');
+        }
+
+        // In-place overwrite helpers to avoid "Assignment to constant variable" errors on const variables
+        function overwriteObjectInPlace(target, source) {
+            for (let prop in target) {
+                if (target.hasOwnProperty(prop)) {
+                    delete target[prop];
+                }
+            }
+            Object.assign(target, source);
+        }
+
+        function overwriteArrayInPlace(target, source) {
+            target.length = 0;
+            source.forEach(item => target.push(item));
+        }
+
+        // Render origin plazas selector dynamically
+        function renderPlazaSelector(plazas) {
+            const container = document.getElementById('plazaSelectorContainer');
+            if (!container) return;
+
+            let html = `<button class="plaza-btn ${activePlaza === 'ALL' ? 'active' : ''}" data-value="ALL"><i class="fa-solid fa-globe"></i> Todas las Plazas</button>`;
+            
+            const sortedPlazas = plazas.slice().sort();
+            sortedPlazas.forEach(plaza => {
+                const isActive = (activePlaza === plaza) ? 'active' : '';
+                html += `<button class="plaza-btn ${isActive}" data-value="${plaza}"><i class="fa-solid fa-warehouse"></i> ${plaza}</button>`;
+            });
+
+            container.innerHTML = html;
+
+            const buttons = container.querySelectorAll('.plaza-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    buttons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activePlaza = btn.getAttribute('data-value');
+                    
+                    syncSimulatorControls();
+                    updateDashboard();
+                    showToast(`Plaza de Origen cambiada a: ${btn.innerText}`);
+                });
+            });
+        }
+
+        // Populates or hides the Fase Padre dropdown filter reactively
+        function updateFilterFasePadreDropdown(records) {
+            const dropdown = document.getElementById('filterFasePadre');
+            const group = document.getElementById('filterFasePadreGroup');
+            if (!dropdown || !group) return;
+
+            const uniqueFPs = [...new Set(records.map(r => r.FasePadre))].filter(Boolean);
+            
+            if (uniqueFPs.length <= 1) {
+                group.style.display = 'none';
+                dropdown.innerHTML = `<option value="ALL">Todas las Fases Padres</option>`;
+                return;
+            }
+
+            let html = `<option value="ALL">Todas las Fases Padres (${uniqueFPs.length})</option>`;
+            uniqueFPs.forEach(fp => {
+                html += `<option value="${fp}">${fp}</option>`;
+            });
+            dropdown.innerHTML = html;
+            group.style.display = 'flex';
+        }
+
+        // Rebuilds the Process Phase dropdown reactively for custom Excel records
+        function rebuildFaseDropdown() {
+            if (!isCustomDatasetLoaded) return;
+            
+            const fpDropdown = document.getElementById('filterFasePadre');
+            const activeFasePadre = fpDropdown ? fpDropdown.value : "ALL";
+            
+            let subset = CUSTOM_RECORDS;
+            if (activePlaza !== 'ALL') subset = subset.filter(r => r.PlazaOrigen === activePlaza);
+            if (activeFasePadre !== 'ALL') subset = subset.filter(r => r.FasePadre === activeFasePadre);
+            
+            const uniqueFases = [...new Set(subset.map(r => r.Fase))].filter(Boolean);
+            
+            const select = document.getElementById('filterFase');
+            if (!select) return;
+            
+            const previousVal = select.value;
+            
+            let html = `<option value="ALL">Todas las Fases (${uniqueFases.length})</option>`;
+            uniqueFases.forEach(fase => {
+                const label = fase.toLowerCase().includes('recepcion') ? 'Recepción Mercancía Almacén' :
+                              fase.toLowerCase().includes('carga') ? 'Carga / Estiba de Contenedor' :
+                              fase.toLowerCase().includes('documentacion') ? 'Fase Documental (Aduana/SLA)' :
+                              fase.toLowerCase().includes('bajada') ? 'Bajada Muelle (Tránsito Puerto)' :
+                              fase.toLowerCase().includes('entrega') ? 'Entrega Mercancía' :
+                              fase.toLowerCase().includes('descarga') ? 'Descarga de Contenedor' : fase;
+                html += `<option value="${fase}">${label}</option>`;
+            });
+            
+            select.innerHTML = html;
+            
+            if (uniqueFases.includes(previousVal)) {
+                select.value = previousVal;
+            } else {
+                select.value = "ALL";
+            }
+        }
+
+        // Filters custom records and calculates statistics in real-time
+        function getCustomStatsForFilters(plaza, fasePadre, fase, adr, dia) {
+            let subset = CUSTOM_RECORDS;
+            if (plaza !== 'ALL') subset = subset.filter(r => r.PlazaOrigen === plaza);
+            if (fasePadre !== 'ALL') subset = subset.filter(r => r.FasePadre === fasePadre);
+            if (fase !== 'ALL') subset = subset.filter(r => r.Fase === fase);
+            if (adr !== 'ALL') subset = subset.filter(r => r.ADR === adr);
+            if (dia !== 'ALL') subset = subset.filter(r => r.Dia_Grupo === dia);
+            
+            if (subset.length === 0) return null;
+            
+            const durations = subset.map(r => r.DuracionMinutos);
+            const stats = calculateTukeyStats(durations);
+            
+            return {
+                Total_Registros: stats.Total,
+                Registros_Limpios: stats.Limpios,
+                Registros_Aberrantes: stats.Aberrantes,
+                Percent_Limpios: stats.PctLimpios,
+                Percent_Aberrantes: stats.PctAberrantes,
+                Q1: parseFloat(stats.Q1.toFixed(2)),
+                Mediana: parseFloat(stats.Mediana.toFixed(2)),
+                Q3: parseFloat(stats.Q3.toFixed(2)),
+                IQR: parseFloat(stats.IQR.toFixed(2)),
+                Limite_Tukey: parseFloat(stats.LimiteTukey.toFixed(2)),
+                Min_Limpio: parseFloat(stats.MinLimpio.toFixed(2)),
+                Media_Limpia: parseFloat(stats.MediaLimpia.toFixed(2)),
+                Max_Limpio: parseFloat(stats.MaxLimpio.toFixed(2))
+            };
+        }
+
+        // Clear all custom uploaded data and return to the premium welcome screen
+        function clearUploadedData() {
+            isCustomDatasetLoaded = false;
+            CUSTOM_RECORDS = [];
+            
+            // Hide the app body and show the welcome screen
+            document.getElementById('dashboardAppBody').style.display = 'none';
+            document.getElementById('welcomeScreen').style.display = 'flex';
+            document.getElementById('btnResetDefault').style.display = 'none';
+            
+            // Reset files inputs
+            document.getElementById('excelFileInput').value = '';
+            const welcomeInput = document.getElementById('welcomeExcelFileInput');
+            if (welcomeInput) welcomeInput.value = '';
+            
+            // Reset parent phase group
+            const fpGroup = document.getElementById('filterFasePadreGroup');
+            if (fpGroup) fpGroup.style.display = 'none';
+            const fpDropdown = document.getElementById('filterFasePadre');
+            if (fpDropdown) fpDropdown.innerHTML = `<option value="ALL">Todas las Fases Padres</option>`;
+
+            // Reset other filters
+            resetAllFilters();
+            showToast("Datos limpiados correctamente");
+        }
+
+        // Recalculates OLS and Partidas stats from custom parsed Excel
+        function recalculateAllDashboardStats(records) {
+            // 1. Recalculate OLS Regressions dynamically for loaded Plazas and Phases
+            const newRegresionesStats = [];
+            const uniquePlazas = [...new Set(records.map(r => r.PlazaOrigen))].filter(Boolean);
+            const uniqueFases = [...new Set(records.map(r => r.Fase))].filter(f => f !== 'BAJADA MUELLE ORIGEN');
+            
+            uniquePlazas.forEach(plaza => {
+                uniqueFases.forEach(fase => {
+                    const subset = records.filter(r => r.PlazaOrigen === plaza && r.Fase === fase);
+                    if (subset.length < 10) return;
+                    
+                    const durations = subset.map(r => r.DuracionMinutos);
+                    const q1 = getPercentile(durations, 0.25);
+                    const q3 = getPercentile(durations, 0.75);
+                    const iqr = q3 - q1;
+                    const lim = q3 + 1.5 * iqr;
+                    
+                    const cleanSubset = subset.filter(r => r.DuracionMinutos <= lim);
+                    if (cleanSubset.length < 10) return;
+                    
+                    const hasPartidas = (fase !== 'DOCUMENTACION');
+                    const regression = fitOLS(cleanSubset, hasPartidas);
+                    
+                    if (regression) {
+                        newRegresionesStats.push({
+                            Delegacion: plaza,
+                            Fase: fase,
+                            R2: parseFloat(regression.R2.toFixed(5)),
+                            Intercepto: parseFloat(regression.Intercept.toFixed(4)),
+                            Coef_Dia: parseFloat(regression.CoefDia.toFixed(4)),
+                            Coef_ADR: parseFloat(regression.CoefADR.toFixed(4)),
+                            Coef_Partidas: hasPartidas ? parseFloat(regression.CoefPartidas.toFixed(4)) : null
+                        });
+                    }
+                });
+            });
+            
+            overwriteArrayInPlace(REGRESIONES_STATS, newRegresionesStats);
+            
+            // 2. Recalculate Partidas stats for complexity table
+            const newPartidasStats = [];
+            const maxPartidas = 15;
+            for (let np = 1; np <= maxPartidas; np++) {
+                const subset = records.filter(r => r.NumPartidas === np);
+                if (subset.length === 0) continue;
+                
+                const durations = subset.map(r => r.DuracionMinutos);
+                const stats = calculateTukeyStats(durations);
+                
+                newPartidasStats.push({
+                    NumPartidas: np,
+                    Q1: parseFloat(stats.Q1.toFixed(2)),
+                    "Mediana (Q2)": parseFloat(stats.Mediana.toFixed(2)),
+                    Q3: parseFloat(stats.Q3.toFixed(2)),
+                    IQR: parseFloat(stats.IQR.toFixed(2)),
+                    Limite_Tukey: parseFloat(stats.LimiteTukey.toFixed(2)),
+                    "Mejor_Caso (Min Limpio)": parseFloat(stats.MinLimpio.toFixed(2)),
+                    "Caso_Comun (Media Limpia)": parseFloat(stats.MediaLimpia.toFixed(2)),
+                    "Peor_Caso (Max Limpio)": parseFloat(stats.MaxLimpio.toFixed(2)),
+                    Total_Registros: stats.Total,
+                    Registros_Limpios: stats.Limpios
+                });
+            }
+            
+            overwriteArrayInPlace(PARTIDAS_STATS, newPartidasStats);
+            
+            loadPartidasTable();
+            updateDashboard();
+        }
+
+        // Handles Excel file uploads using SheetJS
+        function handleExcelUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            document.getElementById('loaderOverlay').classList.add('show');
+            
+            setTimeout(() => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        
+                        const rawRecords = XLSX.utils.sheet_to_json(worksheet);
+                        
+                        if (rawRecords.length === 0) {
+                            throw new Error("El archivo de Excel está vacío.");
+                        }
+                        
+                        const sample = rawRecords[0];
+                        const requiredCols = ['PlazaOrigen', 'Fase', 'ADR', 'FechaExpedicion', 'Codigo', 'NumPartidas', 'DuracionMinutos'];
+                        const missing = requiredCols.filter(col => !(col in sample));
+                        if (missing.length > 0) {
+                            throw new Error(`Faltan columnas obligatorias: ${missing.join(', ')}`);
+                        }
+                        
+                        const processedRecords = rawRecords.map(r => {
+                            const cod = r.Codigo ? r.Codigo.toString() : '';
+                            const fechaVal = r.FechaExpedicion ? r.FechaExpedicion.toString() : '';
+                            const dayInt = getDayIntFromFecha(fechaVal);
+                            const diasMap = {0: 'Lunes', 1: 'Martes', 2: 'Miércoles', 3: 'Jueves', 4: 'Viernes', 5: 'Sábado', 6: 'Domingo'};
+                            const diaReal = diasMap[dayInt] || 'Lunes';
+                            const diaBin = dayInt >= 3 ? 1 : 0;
+                            const diaGrp = diaBin === 1 ? 'J-V' : 'L-X';
+                            const adrBin = (r.ADR && r.ADR.toString().toUpperCase() === 'SI') ? 1 : 0;
+                            const adrStr = adrBin === 1 ? 'SI' : 'NO';
+                            
+                            // Parse optional parent phase column or default to 2 - EXPORTACION
+                            const fpVal = r.FasePadre ? r.FasePadre.toString().trim() : '2 - EXPORTACION';
+                            
+                            return {
+                                PlazaOrigen: r.PlazaOrigen ? r.PlazaOrigen.toString().trim() : '',
+                                FasePadre: fpVal,
+                                Fase: r.Fase ? r.Fase.toString().trim() : '',
+                                ADR: adrStr,
+                                ADR_Binario: adrBin,
+                                FechaExpedicion: fechaVal,
+                                Codigo: cod,
+                                NumPartidas: parseInt(r.NumPartidas) || 1,
+                                DuracionMinutos: parseFloat(r.DuracionMinutos) || 0.0,
+                                Dia: diaReal,
+                                Dia_Int: dayInt,
+                                Dia_Binario: diaBin,
+                                Dia_Grupo: diaGrp
+                            };
+                        });
+                        
+                        if (!ORIGINAL_DASHBOARD_STATS) {
+                            ORIGINAL_DASHBOARD_STATS = JSON.parse(JSON.stringify(DASHBOARD_STATS));
+                            ORIGINAL_REGRESIONES_STATS = JSON.parse(JSON.stringify(REGRESIONES_STATS));
+                            ORIGINAL_PARTIDAS_STATS = JSON.parse(JSON.stringify(PARTIDAS_STATS));
+                        }
+                        
+                        isCustomDatasetLoaded = true;
+                        CUSTOM_RECORDS = processedRecords;
+                        
+                        // Show the app body and hide the welcome screen
+                        document.getElementById('dashboardAppBody').style.display = 'block';
+                        document.getElementById('welcomeScreen').style.display = 'none';
+                        
+                        // Dynamically render selector buttons for Plazas Origen found
+                        const uniquePlazas = [...new Set(processedRecords.map(r => r.PlazaOrigen))].filter(Boolean);
+                        renderPlazaSelector(uniquePlazas);
+                        
+                        // Dynamically populate parent phases
+                        updateFilterFasePadreDropdown(processedRecords);
+                        
+                        recalculateAllDashboardStats(processedRecords);
+                        
+                        document.getElementById('btnResetDefault').style.display = 'inline-flex';
+                        document.getElementById('loaderOverlay').classList.remove('show');
+                        showToast(`¡Excel cargado! ${processedRecords.length.toLocaleString()} registros procesados.`);
+                        
+                    } catch(err) {
+                        document.getElementById('loaderOverlay').classList.remove('show');
+                        alert(`Error al procesar el archivo Excel: ${err.message}`);
+                    }
+                };
+                
+                reader.readAsArrayBuffer(file);
+            }, 100);
+        }
+
+        // Active Filter States
+        let activePlaza = "ALL";
+        let activeFase = "ALL";
+        let activeDia = "ALL";
+        let activeADR = "ALL";
+
+        // Chart instances
+        let mainChartInstance = null;
+        let stabilityChartInstance = null;
+
+        // Initialize App on DOM Content Loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Backup initial precalculated stats immediately
+            ORIGINAL_DASHBOARD_STATS = JSON.parse(JSON.stringify(DASHBOARD_STATS));
+            ORIGINAL_REGRESIONES_STATS = JSON.parse(JSON.stringify(REGRESIONES_STATS));
+            ORIGINAL_PARTIDAS_STATS = JSON.parse(JSON.stringify(PARTIDAS_STATS));
+
+            // Render default plazas dynamically
+            renderPlazaSelector(['ALC', 'BCN', 'VLC']);
+
+            initCharts();
+            loadPartidasTable();
+            updateDashboard();
+
+            // Apply saved theme state on load
+            const savedTheme = localStorage.getItem('theme');
+            const isLight = (savedTheme === 'light');
+            if (isLight) {
+                const icon = document.getElementById('themeIcon');
+                const text = document.getElementById('themeText');
+                if (icon) {
+                    icon.className = "fa-solid fa-moon";
+                    icon.style.color = "var(--purple)";
+                }
+                if (text) {
+                    text.innerText = "Modo Oscuro";
+                }
+                // Apply immediately
+                updateChartsTheme(true);
+            }
+        });
+
+        // Load the Partidas table from PARTIDAS_STATS
+        function loadPartidasTable() {
+            if (isCustomDatasetLoaded) {
+                updatePartidasTableReactively();
+                return;
+            }
+
+            const tbody = document.getElementById('partidasTableBody');
+            if (!tbody || typeof PARTIDAS_STATS === 'undefined') return;
+
+            let html = '';
+            PARTIDAS_STATS.forEach(row => {
+                const total = row.Total_Registros;
+                const limpios = row.Registros_Limpios;
+                const pctLimpios = ((limpios / total) * 100).toFixed(2);
+                
+                html += `
+                <tr id="partida-row-${row.NumPartidas}">
+                    <td style="font-weight: 700;">${row.NumPartidas} ${row.NumPartidas === 1 ? 'partida' : 'partidas'}</td>
+                    <td style="text-align: right; font-family: monospace;">${total.toLocaleString()}</td>
+                    <td style="text-align: right;"><span class="badge badge-success">${pctLimpios}%</span></td>
+                    <td style="text-align: right; font-family: monospace;">${formatNum(row.Q1)} min</td>
+                    <td style="text-align: right; font-family: monospace;">${formatNum(row['Mediana (Q2)'])} min</td>
+                    <td style="text-align: right; font-family: monospace; color: var(--error);">${formatNum(row['Peor_Caso (Max Limpio)'])} min</td>
+                    <td style="text-align: right; font-family: monospace; color: var(--warning);">${formatNum(row.Limite_Tukey)} min</td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // Dynamically recalculate Partidas complexity table reactively based on active filters
+        function updatePartidasTableReactively() {
+            if (!isCustomDatasetLoaded) return;
+
+            const fpDropdown = document.getElementById('filterFasePadre');
+            const activeFasePadre = fpDropdown ? fpDropdown.value : "ALL";
+
+            // Filter subset by active dashboard filters
+            let subset = CUSTOM_RECORDS;
+            if (activePlaza !== 'ALL') subset = subset.filter(r => r.PlazaOrigen === activePlaza);
+            if (activeFasePadre !== 'ALL') subset = subset.filter(r => r.FasePadre === activeFasePadre);
+            if (activeFase !== 'ALL') subset = subset.filter(r => r.Fase === activeFase);
+            if (activeADR !== 'ALL') subset = subset.filter(r => r.ADR === activeADR);
+            if (activeDia !== 'ALL') {
+                const arr = activeDia.split(',');
+                subset = subset.filter(r => arr.includes(r.Dia));
+            }
+
+            const tbody = document.getElementById('partidasTableBody');
+            if (!tbody) return;
+
+            let html = '';
+            const maxPartidas = 15;
+            for (let np = 1; np <= maxPartidas; np++) {
+                const partSubset = subset.filter(r => r.NumPartidas === np);
+                if (partSubset.length === 0) continue;
+
+                const durations = partSubset.map(r => r.DuracionMinutos);
+                const stats = calculateTukeyStats(durations);
+
+                const total = stats.Total;
+                const limpios = stats.Limpios;
+                const pctLimpios = stats.PctLimpios;
+
+                html += `
+                <tr id="partida-row-${np}">
+                    <td style="font-weight: 700;">${np} ${np === 1 ? 'partida' : 'partidas'}</td>
+                    <td style="text-align: right; font-family: monospace;">${total.toLocaleString()}</td>
+                    <td style="text-align: right;"><span class="badge badge-success">${formatNum(pctLimpios)}%</span></td>
+                    <td style="text-align: right; font-family: monospace;">${formatNum(stats.Q1)} min</td>
+                    <td style="text-align: right; font-family: monospace;">${formatNum(stats.Mediana)} min</td>
+                    <td style="text-align: right; font-family: monospace; color: var(--error);">${formatNum(stats.MaxLimpio)} min</td>
+                    <td style="text-align: right; font-family: monospace; color: var(--warning);">${formatNum(stats.LimiteTukey)} min</td>
+                </tr>`;
+            }
+
+            if (html === '') {
+                html = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); font-style: italic; padding: 1.5rem;">Sin registros para esta combinación de filtros</td></tr>`;
+            }
+
+            tbody.innerHTML = html;
+        }
+
+        // Highlight row in Partidas Table
+        function highlightPartidaRow(num) {
+            for (let i = 1; i <= 15; i++) {
+                const el = document.getElementById(`partida-row-${i}`);
+                if (el) el.classList.remove('highlighted');
+            }
+            const activeRow = document.getElementById(`partida-row-${num}`);
+            if (activeRow) activeRow.classList.add('highlighted');
+        }
+
+        // Reset all filters to default
+        function resetAllFilters() {
+            document.querySelectorAll('.plaza-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.plaza-btn[data-value="ALL"]').classList.add('active');
+            activePlaza = "ALL";
+
+            document.getElementById('filterFase').value = "ALL";
+            document.getElementById('filterDia').value = "ALL";
+            document.getElementById('filterADR').value = "ALL";
+            
+            updateDashboard();
+            showToast("Filtros restablecidos correctamente");
+        }
+
+        // Show a brief glassmorphic toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Get key for the precalculated statistics JSON
+        function getStatsKey(plaza, fase, adr, dia) {
+            return `Plaza:${plaza}|Fase:${fase}|ADR:${adr}|Dia:${dia}`;
+        }
+
+        // Update dashboard KPIs, Charts, Regressions, and Predictor
+        function updateDashboard() {
+            rebuildFaseDropdown();
+
+            activeFase = document.getElementById('filterFase').value;
+            const selectedOptions = Array.from(document.getElementById('filterDia').selectedOptions).map(o => o.value);
+            activeDia = 'ALL';
+            if (!selectedOptions.includes('ALL') && selectedOptions.length > 0) {
+                activeDia = selectedOptions.sort().join(',');
+            }
+            activeADR = document.getElementById('filterADR').value;
+            
+            const fpDropdown = document.getElementById('filterFasePadre');
+            const activeFasePadre = fpDropdown ? fpDropdown.value : "ALL";
+
+            // Update Tukey per phase table dynamically based on other active filters
+            updateTukeyPhaseTable();
+
+            // Update Partidas complexity table dynamically based on active filters
+            updatePartidasTableReactively();
+
+            let stats = null;
+            if (isCustomDatasetLoaded) {
+                stats = getCustomStatsForFilters(activePlaza, activeFasePadre, activeFase, activeADR, activeDia);
+            } else {
+                const key = getStatsKey(activePlaza, activeFase, activeADR, activeDia);
+                stats = DASHBOARD_STATS[key];
+                
+                // Add debug visually
+                let debugDiv = document.getElementById('debugInfoPanel');
+                if(!debugDiv) {
+                    debugDiv = document.createElement('div');
+                    debugDiv.id = 'debugInfoPanel';
+                    debugDiv.style = 'color: #ffaa00; font-family: monospace; background: #222; padding: 10px; margin-bottom: 10px; border-radius: 5px;';
+                    document.querySelector('.dashboard-header').appendChild(debugDiv);
+                }
+                debugDiv.innerText = `DEBUG KEY: [${key}] | FOUND: ${stats ? 'YES' : 'NO'}`;
+            }
+
+            if (!stats) {
+                // Handle case where combination has zero records
+                setKPIsToEmpty();
+                updateStabilityDonut(0, 100);
+                updateMainChartEmpty();
+                showToast("No se encontraron registros para la combinación seleccionada");
+                return;
+            }
+
+            // Update KPI numbers
+            document.getElementById('kpiTotal').innerText = stats.Total_Registros.toLocaleString();
+            document.getElementById('kpiEstandarCount').innerText = stats.Registros_Limpios.toLocaleString();
+            document.getElementById('kpiEstandarPct').innerText = stats.Percent_Limpios + "%";
+            document.getElementById('kpiAberranteCount').innerText = stats.Registros_Aberrantes.toLocaleString();
+            document.getElementById('kpiAberrantePct').innerText = stats.Percent_Aberrantes + "%";
+            document.getElementById('kpiTukey').innerText = formatNum(stats.Limite_Tukey) + " min";
+            document.getElementById('kpiMediaLimpia').innerText = formatNum(stats.Mediana) + " min";
+            document.getElementById('kpiMinLimpio').innerText = formatNum(stats.Q1) + " min";
+            document.getElementById('kpiMaxLimpio').innerText = formatNum(stats.Max_Limpio) + " min";
+
+            // Update Quality/Stability Bar
+            const barFill = document.getElementById('stabilityBarFill');
+            barFill.style.width = stats.Percent_Limpios + "%";
+            document.getElementById('barEstPct').innerText = `Estándar: ${stats.Percent_Limpios}%`;
+            document.getElementById('barAberPct').innerText = `Aberrantes: ${stats.Percent_Aberrantes}%`;
+
+            // Update Charts
+            updateStabilityDonut(stats.Percent_Limpios, stats.Percent_Aberrantes);
+            updateMainChart(stats);
+
+            // Update Regression view & Calculator
+            updateRegressionModel();
+        }
+
+        // Toggle premium Light / Dark Theme dynamically
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('themeIcon');
+            const text = document.getElementById('themeText');
+            if (!body || !icon || !text) return;
+            
+            body.classList.toggle('light-theme');
+            
+            const isLight = body.classList.contains('light-theme');
+            if (isLight) {
+                icon.className = "fa-solid fa-moon";
+                icon.style.color = "var(--purple)";
+                text.innerText = "Modo Oscuro";
+                localStorage.setItem('theme', 'light');
+            } else {
+                icon.className = "fa-solid fa-sun";
+                icon.style.color = "var(--warning)";
+                text.innerText = "Modo Claro";
+                localStorage.setItem('theme', 'dark');
+            }
+            
+            updateChartsTheme(isLight);
+        }
+
+        // Update Chart.js configuration dynamically based on active theme
+        function updateChartsTheme(isLight) {
+            if (!mainChartInstance) return;
+            
+            const tickColor = isLight ? '#475569' : '#94a3b8';
+            const gridColor = isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.05)';
+            
+            mainChartInstance.options.scales.x.ticks.color = tickColor;
+            mainChartInstance.options.scales.y.ticks.color = tickColor;
+            mainChartInstance.options.scales.y.grid.color = gridColor;
+            
+            // Vibrant, high-contrast, premium colors for both themes
+            if (isLight) {
+                mainChartInstance.data.datasets[0].backgroundColor = [
+                    'rgba(8, 145, 178, 0.45)',   // Cyan
+                    'rgba(37, 99, 235, 0.45)',   // Blue (Q1)
+                    'rgba(37, 99, 235, 0.75)',   // Stronger Blue (Mediana)
+                    'rgba(5, 150, 105, 0.75)',   // Emerald (Media)
+                    'rgba(124, 58, 237, 0.45)',  // Purple (Q3)
+                    'rgba(217, 119, 6, 0.65)',   // Amber (Tukey Limit)
+                    'rgba(220, 38, 38, 0.45)'    // Red (Max Clean / P95)
+                ];
+                mainChartInstance.data.datasets[0].borderColor = [
+                    '#0891b2',
+                    '#2563eb',
+                    '#1d4ed8',
+                    '#047857',
+                    '#7c3aed',
+                    '#d97706',
+                    '#dc2626'
+                ];
+            } else {
+                mainChartInstance.data.datasets[0].backgroundColor = [
+                    'rgba(6, 182, 212, 0.35)',
+                    'rgba(59, 130, 246, 0.35)',
+                    'rgba(59, 130, 246, 0.65)',
+                    'rgba(16, 185, 129, 0.65)',
+                    'rgba(139, 92, 246, 0.35)',
+                    'rgba(245, 158, 11, 0.55)',
+                    'rgba(239, 68, 68, 0.35)'
+                ];
+                mainChartInstance.data.datasets[0].borderColor = [
+                    '#06b6d4',
+                    '#3b82f6',
+                    '#2563eb',
+                    '#10b981',
+                    '#8b5cf6',
+                    '#f59e0b',
+                    '#ef4444'
+                ];
+            }
+            
+            mainChartInstance.update();
+            
+            const formula = document.getElementById('formulaContainer');
+            if (formula) {
+                formula.style.background = isLight ? 'rgba(0, 0, 0, 0.03)' : 'rgba(255, 255, 255, 0.03)';
+                formula.style.color = isLight ? '#0f172a' : '#f8fafc';
+            }
+        }
+
+        // Dynamically populate the per-phase Tukey limit table
+        function updateTukeyPhaseTable() {
+            const tbody = document.getElementById('tukeyPhaseTableBody');
+            if (!tbody) return;
+
+            const fpDropdown = document.getElementById('filterFasePadre');
+            const activeFasePadre = fpDropdown ? fpDropdown.value : "ALL";
+
+            let phasesList = [];
+            if (isCustomDatasetLoaded) {
+                const uniquePhases = [...new Set(CUSTOM_RECORDS.map(r => r.Fase))].filter(Boolean);
+                phasesList = uniquePhases.map(p => ({
+                    id: p,
+                    label: p.toLowerCase().includes('recepcion') ? 'Recepción Mercancía Almacén' :
+                           p.toLowerCase().includes('carga') ? 'Carga / Estiba de Contenedor' :
+                           p.toLowerCase().includes('documentacion') ? 'Fase Documental (Aduana/SLA)' :
+                           p.toLowerCase().includes('bajada') ? 'Bajada Muelle (Tránsito Puerto)' : p
+                }));
+            } else {
+                phasesList = [
+                    { id: 'RECEPCION MERCANCIA ALMACEN ORIGEN', label: 'Recepción Mercancía Almacén' },
+                    { id: 'CARGA ALMACEN ORIGEN', label: 'Carga / Estiba de Contenedor' },
+                    { id: 'DOCUMENTACION', label: 'Fase Documental (Aduana/SLA)' },
+                    { id: 'BAJADA MUELLE ORIGEN', label: 'Bajada Muelle (Tránsito Puerto)' }
+                ];
+            }
+
+            let html = '';
+            phasesList.forEach(pInfo => {
+                let pStats = null;
+                if (isCustomDatasetLoaded) {
+                    pStats = getCustomStatsForFilters(activePlaza, activeFasePadre, pInfo.id, activeADR, activeDia);
+                } else {
+                    const pKey = `Plaza:${activePlaza}|Fase:${pInfo.id}|ADR:${activeADR}|Dia:${activeDia}`;
+                    pStats = DASHBOARD_STATS[pKey];
+                }
+
+                const isCurrent = (activeFase === pInfo.id);
+                const isPhaseFilterActive = (activeFase !== 'ALL');
+                
+                let rowClass = '';
+                if (isCurrent) {
+                    rowClass = 'class="active-phase-row"';
+                } else if (isPhaseFilterActive) {
+                    rowClass = 'class="inactive-phase-row"';
+                }
+
+                if (pStats) {
+                    html += `
+                    <tr ${rowClass}>
+                        <td style="font-weight: 600; padding: 0.75rem 1rem;">
+                            ${isCurrent ? '<i class="fa-solid fa-chevron-right" style="color: var(--primary); margin-right: 0.4rem;"></i>' : ''}
+                            ${pInfo.label}
+                        </td>
+                        <td style="text-align: right; font-family: monospace; padding: 0.75rem 1rem;">${pStats.Total_Registros.toLocaleString()}</td>
+                        <td style="text-align: right; font-family: monospace; color: var(--warning); font-weight: 700; padding: 0.75rem 1rem;">${formatNum(pStats.Limite_Tukey)} min</td>
+                        <td style="text-align: right; padding: 0.75rem 1rem;">
+                            <span style="font-family: monospace; font-weight: bold; color: var(--text-primary);">${pStats.Registros_Limpios.toLocaleString()}</span>
+                            <span class="badge badge-success" style="margin-left: 0.4rem; padding: 0.15rem 0.40rem; font-size: 0.72rem;">${formatNum(pStats.Percent_Limpios)}%</span>
+                        </td>
+                        <td style="text-align: right; padding: 0.75rem 1rem;">
+                            <span style="font-family: monospace; font-weight: 500; color: var(--text-secondary);">${pStats.Registros_Aberrantes.toLocaleString()}</span>
+                            <span class="badge badge-error" style="margin-left: 0.4rem; padding: 0.15rem 0.40rem; font-size: 0.72rem;">${formatNum(pStats.Percent_Aberrantes)}%</span>
+                        </td>
+                        <td style="text-align: right; font-family: monospace; padding: 0.75rem 1rem;">${formatNum(pStats.Q1)} min</td>
+                        <td style="text-align: right; font-family: monospace; font-weight: 600; color: var(--info); padding: 0.75rem 1rem;">${formatNum(pStats.Mediana)} min</td>
+                        <td style="text-align: right; font-family: monospace; padding: 0.75rem 1rem;">${formatNum(pStats.Max_Limpio)} min</td>
+                    </tr>`;
+                } else {
+                    html += `
+                    <tr ${rowClass}>
+                        <td style="font-weight: 600; color: var(--text-muted); padding: 0.75rem 1rem;">${pInfo.label}</td>
+                        <td colspan="8" style="text-align: center; color: var(--text-muted); font-style: italic; padding: 0.75rem 1rem;">Sin registros para esta combinación</td>
+                    </tr>`;
+                }
+            });
+            tbody.innerHTML = html;
+        }
+
+        function setKPIsToEmpty() {
+            document.getElementById('kpiTotal').innerText = "0";
+            document.getElementById('kpiEstandarCount').innerText = "0";
+            document.getElementById('kpiEstandarPct').innerText = "0%";
+            document.getElementById('kpiAberranteCount').innerText = "0";
+            document.getElementById('kpiAberrantePct').innerText = "0%";
+            document.getElementById('kpiTukey').innerText = "0 min";
+            document.getElementById('kpiMediaLimpia').innerText = "0 min";
+            document.getElementById('kpiMinLimpio').innerText = "0 min";
+            document.getElementById('kpiMaxLimpio').innerText = "0 min";
+            
+            document.getElementById('stabilityBarFill').style.width = "0%";
+            document.getElementById('barEstPct').innerText = "Estándar: 0%";
+            document.getElementById('barAberPct').innerText = "Aberrante: 0%";
+        }
+
+        // Initialize Chart.js instances
+        function initCharts() {
+            // Donut Chart
+            const ctxDonut = document.getElementById('stabilityDonutChart').getContext('2d');
+            stabilityChartInstance = new Chart(ctxDonut, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Estándar', 'Aberrante (Outliers)'],
+                    datasets: [{
+                        data: [100, 0],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.75)',  // Emerald Green
+                            'rgba(239, 68, 68, 0.75)'     // Bright Red
+                        ],
+                        borderColor: [
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(239, 68, 68, 1)'
+                        ],
+                        borderWidth: 1.5,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    cutout: '70%'
+                }
+            });
+
+            // Main Bar Chart (for Quartiles and Tukey limits)
+            const ctxMain = document.getElementById('mainChart').getContext('2d');
+            mainChartInstance = new Chart(ctxMain, {
+                type: 'bar',
+                data: {
+                    labels: ['Mínimo Limpio', 'Primer Cuartil (Q1)', 'Tiempo Típico (Mediana)', 'Media Flujo Limpio', 'Tercer Cuartil (Q3)', 'Límite Tukey (Outliers)', 'Percentil 95 (P95)'],
+                    datasets: [{
+                        label: 'Duración (Minutos)',
+                        data: [0, 0, 0, 0, 0, 0, 0],
+                        backgroundColor: [
+                            'rgba(6, 182, 212, 0.35)',  // Min Cyan
+                            'rgba(59, 130, 246, 0.35)',  // Q1 Blue
+                            'rgba(59, 130, 246, 0.65)',  // Mediana Stronger Blue
+                            'rgba(16, 185, 129, 0.65)',  // Media Limpia Green
+                            'rgba(139, 92, 246, 0.35)',  // Q3 Purple
+                            'rgba(245, 158, 11, 0.55)',  // Tukey Warning Yellow
+                            'rgba(239, 68, 68, 0.35)'    // Max Clean Red
+                        ],
+                        borderColor: [
+                            '#06b6d4',
+                            '#3b82f6',
+                            '#2563eb',
+                            '#10b981',
+                            '#8b5cf6',
+                            '#f59e0b',
+                            '#ef4444'
+                        ],
+                        borderWidth: 1.5,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` Duración: ${context.parsed.y} minutos`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8', font: { size: 9 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update stability donut data
+        function updateStabilityDonut(limpios, aberrantes) {
+            stabilityChartInstance.data.datasets[0].data = [limpios, aberrantes];
+            stabilityChartInstance.update();
+        }
+
+        // Update main statistics distribution chart
+        function updateMainChart(stats) {
+            mainChartInstance.data.datasets[0].data = [
+                stats.Min_Limpio,
+                stats.Q1,
+                stats.Mediana,
+                stats.Media_Limpia,
+                stats.Q3,
+                stats.Limite_Tukey,
+                stats.Max_Limpio
+            ];
+            mainChartInstance.update();
+        }
+
+        function updateMainChartEmpty() {
+            mainChartInstance.data.datasets[0].data = [0, 0, 0, 0, 0, 0, 0];
+            mainChartInstance.update();
+        }
+
+        // Sync simulator options when user switches Plaza/Fase
+        function syncSimulatorControls() {
+            const fase = document.getElementById('filterFase').value;
+            const simPartidasGroup = document.getElementById('simPartidasGroup');
+            
+            // Si la fase seleccionada es Documentación, no importa las partidas
+            if (fase === 'DOCUMENTACION') {
+                simPartidasGroup.style.opacity = '0.4';
+                simPartidasGroup.style.pointerEvents = 'none';
+            } else {
+                simPartidasGroup.style.opacity = '1';
+                simPartidasGroup.style.pointerEvents = 'auto';
+            }
+        }
+
+        // Find OLS coefficients for current selection (activePlaza, activeFase)
+        function getRegressionCoefficients(plaza, fase) {
+            let lookupPlaza = plaza;
+            let lookupFase = fase;
+
+            if (plaza === 'ALL') {
+                lookupPlaza = (REGRESIONES_STATS.length > 0) ? REGRESIONES_STATS[0].Delegacion : 'BCN';
+            }
+            if (fase === 'ALL' || fase === 'BAJADA MUELLE ORIGEN') {
+                const matchReg = REGRESIONES_STATS.find(r => r.Delegacion === lookupPlaza);
+                lookupFase = matchReg ? matchReg.Fase : 'RECEPCION MERCANCIA ALMACEN ORIGEN';
+            }
+
+            const coef = REGRESIONES_STATS.find(r => r.Delegacion === lookupPlaza && r.Fase === lookupFase);
+            return coef || null;
+        }
+
+        // Update OLS model display cards and rebuild MathJax equation
+        function updateRegressionModel() {
+            syncSimulatorControls();
+            
+            const predictiveSection = document.getElementById('predictiveModelingSection');
+            if (predictiveSection) {
+                if (activeFase === 'BAJADA MUELLE ORIGEN') {
+                    predictiveSection.style.display = 'none';
+                    return;
+                } else {
+                    predictiveSection.style.display = 'grid';
+                }
+            }
+            
+            let rawCoef = getRegressionCoefficients(activePlaza, activeFase);
+            const coefList = document.getElementById('coefList');
+            const formulaContainer = document.getElementById('formulaContainer');
+            const regNote = document.getElementById('regressionNote');
+            
+            if (!rawCoef) {
+                coefList.innerHTML = `<div style="text-align:center; padding: 1.5rem; color: var(--text-muted); font-size: 0.9rem;">
+                    <i class="fa-solid fa-circle-nodes"></i> Sin coeficientes de regresión lineal para esta fase.
+                </div>`;
+                formulaContainer.innerHTML = `$$\\text{No Aplicable (Transit Time Externo)}$$`;
+                regNote.style.display = 'block';
+                
+                // Disable simulator status box
+                document.getElementById('predictionValue').innerText = "N/A";
+                document.getElementById('predictionValueFormatted').innerText = "No disponible";
+                document.getElementById('predictionResultBox').className = "prediction-result-box normal";
+                document.getElementById('predictionStatus').innerHTML = `<i class="fa-solid fa-ban"></i> Modelo no aplicable`;
+                
+                if (window.MathJax) MathJax.typesetPromise();
+                return;
+            }
+
+            regNote.style.display = (activeFase === 'ALL' || activeFase === 'DOCUMENTACION') ? 'block' : 'none';
+
+            // --- Lógica de Traducción de Base ---
+            // El usuario seleccionó días. Extraer días activos del filtro.
+            const selectedOptions = Array.from(document.getElementById('filterDia').selectedOptions).map(o => o.value);
+            let diasActivos = selectedOptions.includes('ALL') || selectedOptions.length === 0 
+                ? ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] 
+                : selectedOptions;
+
+            // Clonar para no modificar original
+            let coef = {...rawCoef};
+            
+            // Días dummy que existen en el modelo (Base: Lunes -> 0)
+            const ALL_DUMMIES = ['Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+            
+            // 1. Calcular el shift promedio de los días seleccionados respecto a la base (Lunes)
+            let sumShifts = 0;
+            diasActivos.forEach(d => {
+                if (d !== 'Lunes') {
+                    sumShifts += coef[`Coef_Dia_${d}`] || 0;
+                }
+            });
+            let shiftPromedio = sumShifts / diasActivos.length;
+
+            // 2. Ajustar Intercepto
+            coef.Intercepto = coef.Intercepto + shiftPromedio;
+
+            // 3. Ajustar Coeficientes de Días (Restar el shift)
+            // Agregamos Coef_Dia_Lunes para que exista en el output traducido
+            coef['Coef_Dia_Lunes'] = 0 - shiftPromedio;
+            ALL_DUMMIES.forEach(d => {
+                coef[`Coef_Dia_${d}`] = (coef[`Coef_Dia_${d}`] || 0) - shiftPromedio;
+            });
+
+            // Guardamos el objeto traducido globalmente para el simulador
+            window.currentTranslatedCoefs = coef;
+            window.currentActiveDiasStr = diasActivos.length === 7 ? 'Semana Completa' : diasActivos.join(', ');
+
+            // Print coefficients
+            let html = '';
+            
+            // Intercept
+            html += `
+            <div class="coef-item">
+                <span class="coef-name"><i class="fa-solid fa-sliders" style="color: var(--primary);"></i> Intercepto Base ($\beta_0$) - ${window.currentActiveDiasStr}</span>
+                <span class="coef-value">${coef.Intercepto > 0 ? '+' : ''}${coef.Intercepto.toFixed(2)} min</span>
+            </div>`;
+
+            const getSigBadge = (pVal) => {
+                if (pVal === undefined || pVal === null || isNaN(pVal)) return '';
+                return pVal <= 0.05 
+                    ? '<span title="Significativo (p <= 0.05)" style="color: var(--success); font-size: 0.8rem; margin-left: 6px;"><i class="fa-solid fa-circle-check"></i></span>'
+                    : '<span title="No Significativo (p > 0.05)" style="color: var(--text-muted); font-size: 0.8rem; margin-left: 6px; opacity: 0.6;"><i class="fa-solid fa-circle-minus"></i></span>';
+            };
+
+            // Partidas
+            if (coef.Coef_Partidas !== null) {
+                html += `
+                <div class="coef-item">
+                    <span class="coef-name"><i class="fa-solid fa-boxes-stacked" style="color: var(--info);"></i> Coef. Partidas ($\beta_1$) ${getSigBadge(coef.P_Value_Partidas)}</span>
+                    <span class="coef-value">${coef.Coef_Partidas > 0 ? '+' : ''}${coef.Coef_Partidas.toFixed(2)} min/partida</span>
+                </div>`;
+            }
+
+            // ADR
+            html += `
+            <div class="coef-item">
+                <span class="coef-name"><i class="fa-solid fa-triangle-exclamation" style="color: var(--error);"></i> Coef. Mercancía ADR ($\beta_A$) ${getSigBadge(coef.P_Value_ADR)}</span>
+                <span class="coef-value">${coef.Coef_ADR > 0 ? '+' : ''}${coef.Coef_ADR.toFixed(2)} min</span>
+            </div>`;
+
+            // Días (Solo mostrar los días si no seleccionó TODOS)
+            let diasKeys = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+            diasKeys.forEach(d => {
+                let val = coef[`Coef_Dia_${d}`];
+                if(Math.abs(val) > 0.01) {
+                    let badge = (d === 'Lunes') ? '' : getSigBadge(rawCoef[`P_Value_Dia_${d}`]); // El P-Value original sirve para indicar si era distinto al Lunes
+                    html += `
+                    <div class="coef-item" style="font-size: 0.85rem; opacity: 0.9;">
+                        <span class="coef-name"><i class="fa-solid fa-calendar-day" style="color: var(--warning);"></i> Ajuste ${d}</span>
+                        <span class="coef-value">${val > 0 ? '+' : ''}${val.toFixed(2)} min</span>
+                    </div>`;
+                }
+            });
+
+            // R2
+            html += `
+            <div class="coef-item" style="background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.2);">
+                <span class="coef-name"><i class="fa-solid fa-chart-line" style="color: var(--info);"></i> Coef. Determinación ($R^2$)</span>
+                <span class="coef-value" style="color: var(--info);">${(coef.R2 * 100).toFixed(2)}%</span>
+            </div>`;
+
+            coefList.innerHTML = html;
+
+            // Rebuild LaTeX Formula
+            let latexFormula = `Y = ${coef.Intercepto.toFixed(1)}`;
+            if (coef.Coef_Partidas !== null) {
+                latexFormula += ` ${coef.Coef_Partidas >= 0 ? '+' : '-'} ${Math.abs(coef.Coef_Partidas).toFixed(1)} X_{\text{part}}`;
+            }
+            latexFormula += ` ${coef.Coef_ADR >= 0 ? '+' : '-'} ${Math.abs(coef.Coef_ADR).toFixed(1)} A_{\text{adr}}`;
+            latexFormula += ` + \Delta_{\text{Día}}`;
+
+            formulaContainer.innerHTML = `$$${latexFormula}$$`;
+
+            if (window.MathJax) MathJax.typesetPromise();
+
+            calculatePrediction();
+        }
+
+        
+
+
+        // Live calculation for the Simulator
+        function calculatePrediction() {
+            const coef = getRegressionCoefficients(activePlaza, activeFase);
+            if (!coef || activeFase === 'BAJADA MUELLE ORIGEN') return;
+
+            const numPartidasVal = parseInt(document.getElementById('simPartidas').value);
+            document.getElementById('simPartidasVal').innerText = numPartidasVal;
+
+            // Highlight row in Partidas Table
+            if (typeof highlightPartidaRow === 'function') {
+                highlightPartidaRow(numPartidasVal);
+            }
+
+            const isDiaPico = document.getElementById('simDiaPico').checked;
+            const isADR = document.getElementById('simADR').checked;
+
+            const valPartidas = coef.Coef_Partidas !== null ? numPartidasVal : 0;
+            const valDia = isDiaPico ? 1 : 0;
+            const valADR = isADR ? 1 : 0;
+
+            // Predict duration
+            let prediction = coef.Intercepto;
+            if (coef.Coef_Partidas !== null) {
+                prediction += coef.Coef_Partidas * valPartidas;
+            }
+            prediction += coef.Coef_Dia * valDia;
+            prediction += coef.Coef_ADR * valADR;
+
+            // Enforce minimum time of 1 minute
+            prediction = Math.max(1.0, prediction);
+
+            // Update UI
+            document.getElementById('predictionValue').innerText = `${prediction.toFixed(1)} min`;
+
+            // Format to hours/minutes
+            let formattedStr = '';
+            if (prediction >= 60) {
+                const h = Math.floor(prediction / 60);
+                const m = Math.round(prediction % 60);
+                formattedStr = `Equivale a aprox. ${h}h ${m}min`;
+            } else {
+                formattedStr = `Equivale a aprox. ${Math.round(prediction)}min`;
+            }
+            document.getElementById('predictionValueFormatted').innerText = formattedStr;
+
+            // Predict Risk/Delays based on standard Tukey limit
+            const key = getStatsKey(activePlaza, activeFase, activeADR, activeDia);
+            const stats = DASHBOARD_STATS[key];
+            const limit = stats ? stats.Limite_Tukey : 9999;
+
+            const resultBox = document.getElementById('predictionResultBox');
+            const statusLabel = document.getElementById('predictionStatus');
+
+            resultBox.className = "prediction-result-box";
+            
+            if (prediction <= limit * 0.5) {
+                resultBox.classList.add('normal');
+                statusLabel.className = "pred-status status-normal";
+                statusLabel.innerHTML = `<i class="fa-solid fa-check-double"></i> Proceso Eficiente`;
+            } else if (prediction <= limit) {
+                resultBox.classList.add('elevated');
+                statusLabel.className = "pred-status status-elevated";
+                statusLabel.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Duración Elevada`;
+            } else {
+                resultBox.classList.add('high');
+                statusLabel.className = "pred-status status-high";
+                statusLabel.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Riesgo de Cuello de Botella (Outlier)`;
+            }
+        }
+
+        // Tabs switching mechanism in Playbook
+        function switchTab(e, tabId) {
+            const tabs = document.querySelectorAll('.tab-btn');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+            
+            e.currentTarget.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+            
+            // Re-run MathJax rendering inside tab if required
+            MathJax.typesetPromise();
+        }
+    </script>
+
+    <!-- Excel Structure Modal -->
+    <div id="excelStructureModal" class="modal-overlay" onclick="closeExcelStructureModal(event)">
+        <div class="modal-card card card-accent-primary" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary);">
+                    <i class="fa-solid fa-table-cells" style="color: var(--primary);"></i> Estructura del Excel Requerida
+                </h3>
+                <button class="modal-close-btn" onclick="closeExcelStructureModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding-top: 0.5rem;">
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.6;">
+                    Para realizar el análisis estadístico en tiempo real, el archivo de Excel debe contener una hoja con estas columnas exactas en su primera fila (los nombres son sensibles a mayúsculas/minúsculas):
+                </p>
+                <div class="partidas-table-container" style="margin-bottom: 1.25rem;">
+                    <table class="partidas-table" style="font-size: 0.82rem;">
+                        <thead>
+                            <tr>
+                                <th>Columna</th>
+                                <th>Tipo</th>
+                                <th>Valores Admitidos / Ejemplo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="font-weight: 700; color: var(--primary);">PlazaOrigen</td>
+                                <td>Texto</td>
+                                <td>Código de origen (ej: <span style="font-family: monospace; color: var(--info);">ALC</span>, <span style="font-family: monospace; color: var(--info);">BCN</span>, <span style="font-family: monospace; color: var(--info);">VLC</span>)</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 700; color: var(--primary);">Fase</td>
+                                <td>Texto</td>
+                                <td>Nombre de fase de muelle exacto:<br>
+                                    - <span style="font-family: monospace; font-size: 0.72rem; color: var(--text-primary);">RECEPCION MERCANCIA ALMACEN ORIGEN</span><br>
+                                    - <span style="font-family: monospace; font-size: 0.72rem; color: var(--text-primary);">CARGA ALMACEN ORIGEN</span><br>
+                                    - <span style="font-family: monospace; font-size: 0.72rem; color: var(--text-primary);">DOCUMENTACION</span><br>
+                                    - <span style="font-family: monospace; font-size: 0.72rem; color: var(--text-primary);">BAJADA MUELLE ORIGEN</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 700; color: var(--primary);">ADR</td>
+                                <td>Texto</td>
+                                <td>Mercancía Peligrosa. Valores: <span style="font-family: monospace; font-weight: bold; color: var(--success);">NO</span> o <span style="font-family: monospace; font-weight: bold; color: var(--error);">SI</span></td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 700; color: var(--primary);">FechaExpedicion</td>
+                                <td>Texto / Fecha</td>
+                                <td>Fecha de expedición en formato <span style="font-family: monospace; color: var(--info);">AAMMDD HH:MM</span> (ej: <span style="font-family: monospace; color: var(--info);">260112 08:46</span> para 12/Enero/2026). Utilizada para calcular el día de la semana real y la presión del ferry.</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 700; color: var(--primary);">Codigo</td>
+                                <td>Texto</td>
+                                <td>Código de tracking/envío (ej: <span style="font-family: monospace; color: var(--warning);">EALC2600140</span>).</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 700; color: var(--primary);">NumPartidas</td>
+                                <td>Entero</td>
+                                <td>Cantidad de partidas del envío (ej: <span style="font-family: monospace; color: var(--info);">1</span>, <span style="font-family: monospace; color: var(--info);">5</span>).</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 700; color: var(--primary);">DuracionMinutos</td>
+                                <td>Numérico</td>
+                                <td>Tiempo total transcurrido en minutos (ej: <span style="font-family: monospace; color: var(--info);">120</span>, <span style="font-family: monospace; color: var(--info);">45.5</span>).</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: 700; color: var(--info);">FasePadre</td>
+                                <td>Texto <span style="font-size: 0.7rem; color: var(--text-secondary);">(Opcional)</span></td>
+                                <td>Agrupador de fases (ej: <span style="font-family: monospace; color: var(--info);">2 - EXPORTACION</span>, <span style="font-family: monospace; color: var(--info);">1 - IMPORTACION</span>). Habilita el filtro de Fase Padre en caliente si existen múltiples fases.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="alert-box" style="margin-top: 1rem; background: rgba(6, 182, 212, 0.08); border-left-color: var(--info); line-height: 1.5;">
+                    <i class="fa-solid fa-circle-info" style="color: var(--info); margin-right: 0.5rem;"></i>
+                    <strong>Nota de Flexibilidad:</strong> El sistema admite archivos <span style="font-family: monospace;">.xlsx</span> y <span style="font-family: monospace;">.xls</span>. Si tu Excel posee cualquier otra columna no listada, será ignorada automáticamente sin interferir con los cálculos matemáticos de Tukey u OLS.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Processing Loader Overlay -->
+    <div id="loaderOverlay" class="loader-overlay">
+        <div class="loader-card">
+            <div class="loader-spinner"></div>
+            <h4 style="margin-top: 1.25rem; font-size: 1.2rem; color: var(--text-primary);">Procesando y Analizando Excel...</h4>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem; max-width: 320px; line-height: 1.5;">
+                Aplicando filtro de Tukey por fase, calculando percentiles P5 (Mejor Caso) y resolviendo regresiones OLS multivariables en tiempo real...
+            </p>
+        </div>
+    </div>
+</body>
+</html>

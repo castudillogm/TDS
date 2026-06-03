@@ -81,6 +81,8 @@ with pd.ExcelWriter(r'c:\Users\castudillo\Documents\Proyectos Antigravity\TDS\Re
     # Solo con datos limpios (<= Limite Tukey) por Fase y Delegación
     resultados_regresion = []
     
+    dias_para_dummies = ['Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+    
     for delegacion in df['PlazaOrigen'].unique():
         for fase in ['RECEPCION MERCANCIA ALMACEN ORIGEN', 'CARGA ALMACEN ORIGEN', 'DOCUMENTACION']:
             subset = df[(df['PlazaOrigen'] == delegacion) & (df['Fase'] == fase)].copy()
@@ -98,11 +100,14 @@ with pd.ExcelWriter(r'c:\Users\castudillo\Documents\Proyectos Antigravity\TDS\Re
                 
             y = clean_data['DuracionMinutos']
             
-            if fase in ['RECEPCION MERCANCIA ALMACEN ORIGEN', 'CARGA ALMACEN ORIGEN']:
-                X = clean_data[['NumPartidas', 'Dia_Binario', 'ADR_Binario']]
-            else: # DOCUMENTACION
-                X = clean_data[['Dia_Binario', 'ADR_Binario']]
+            for d in dias_para_dummies:
+                clean_data[f'Dia_{d}'] = (clean_data['Dia'] == d).astype(int)
                 
+            features = ['ADR_Binario'] + [f'Dia_{d}' for d in dias_para_dummies]
+            if fase in ['RECEPCION MERCANCIA ALMACEN ORIGEN', 'CARGA ALMACEN ORIGEN']:
+                features.insert(0, 'NumPartidas')
+                
+            X = clean_data[features]
             X = sm.add_constant(X)
             
             # Ajustar modelo
@@ -113,14 +118,21 @@ with pd.ExcelWriter(r'c:\Users\castudillo\Documents\Proyectos Antigravity\TDS\Re
                     'Fase': fase,
                     'R2': model.rsquared,
                     'R (Correlacion)': np.sqrt(model.rsquared),
-                    'Intercepto (Base)': model.params.get('const', 0),
-                    'Coef_Dia (J/V)': model.params.get('Dia_Binario', 0),
-                    'Coef_ADR': model.params.get('ADR_Binario', 0)
+                    'Intercepto (Lunes)': model.params.get('const', 0),
+                    'Coef_ADR': model.params.get('ADR_Binario', 0),
+                    'P_Value_ADR': model.pvalues.get('ADR_Binario', np.nan)
                 }
+                
                 if 'NumPartidas' in X.columns:
                     res['Coef_Partidas'] = model.params.get('NumPartidas', 0)
+                    res['P_Value_Partidas'] = model.pvalues.get('NumPartidas', np.nan)
                 else:
                     res['Coef_Partidas'] = np.nan
+                    res['P_Value_Partidas'] = np.nan
+                    
+                for d in dias_para_dummies:
+                    res[f'Coef_Dia_{d}'] = model.params.get(f'Dia_{d}', 0)
+                    res[f'P_Value_Dia_{d}'] = model.pvalues.get(f'Dia_{d}', np.nan)
                     
                 resultados_regresion.append(res)
             except Exception as e:
