@@ -2296,6 +2296,9 @@
                         document.getElementById('loaderOverlay').classList.remove('show');
                         showToast(`¡Excel cargado! ${processedRecords.length.toLocaleString()} registros procesados.`);
                         
+                        // Force dashboard update to show the newly loaded data immediately
+                        updateDashboard();
+                        
                     } catch(err) {
                         document.getElementById('loaderOverlay').classList.remove('show');
                         alert(`Error al procesar el archivo Excel: ${err.message}`);
