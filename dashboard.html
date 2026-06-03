@@ -2961,7 +2961,7 @@
             // Intercept
             html += `
             <div class="coef-item">
-                <span class="coef-name"><i class="fa-solid fa-sliders" style="color: var(--primary);"></i> Intercepto Base ($\beta_0$) - ${window.currentActiveDiasStr}</span>
+                <span class="coef-name"><i class="fa-solid fa-sliders" style="color: var(--primary);"></i> Intercepto Base ($\\beta_0$) - ${window.currentActiveDiasStr}</span>
                 <span class="coef-value">${coef.Intercepto > 0 ? '+' : ''}${coef.Intercepto.toFixed(2)} min</span>
             </div>`;
 
@@ -2976,7 +2976,7 @@
             if (coef.Coef_Partidas !== null) {
                 html += `
                 <div class="coef-item">
-                    <span class="coef-name"><i class="fa-solid fa-boxes-stacked" style="color: var(--info);"></i> Coef. Partidas ($\beta_1$) ${getSigBadge(coef.P_Value_Partidas)}</span>
+                    <span class="coef-name"><i class="fa-solid fa-boxes-stacked" style="color: var(--info);"></i> Coef. Partidas ($\\beta_1$) ${getSigBadge(coef.P_Value_Partidas)}</span>
                     <span class="coef-value">${coef.Coef_Partidas > 0 ? '+' : ''}${coef.Coef_Partidas.toFixed(2)} min/partida</span>
                 </div>`;
             }
@@ -2984,7 +2984,7 @@
             // ADR
             html += `
             <div class="coef-item">
-                <span class="coef-name"><i class="fa-solid fa-triangle-exclamation" style="color: var(--error);"></i> Coef. Mercancía ADR ($\beta_A$) ${getSigBadge(coef.P_Value_ADR)}</span>
+                <span class="coef-name"><i class="fa-solid fa-triangle-exclamation" style="color: var(--error);"></i> Coef. Mercancía ADR ($\\beta_A$) ${getSigBadge(coef.P_Value_ADR)}</span>
                 <span class="coef-value">${coef.Coef_ADR > 0 ? '+' : ''}${coef.Coef_ADR.toFixed(2)} min</span>
             </div>`;
 
@@ -3014,10 +3014,10 @@
             // Rebuild LaTeX Formula
             let latexFormula = `Y = ${coef.Intercepto.toFixed(1)}`;
             if (coef.Coef_Partidas !== null) {
-                latexFormula += ` ${coef.Coef_Partidas >= 0 ? '+' : '-'} ${Math.abs(coef.Coef_Partidas).toFixed(1)} X_{\text{part}}`;
+                latexFormula += ` ${coef.Coef_Partidas >= 0 ? '+' : '-'} ${Math.abs(coef.Coef_Partidas).toFixed(1)} X_{\\text{part}}`;
             }
-            latexFormula += ` ${coef.Coef_ADR >= 0 ? '+' : '-'} ${Math.abs(coef.Coef_ADR).toFixed(1)} A_{\text{adr}}`;
-            latexFormula += ` + \Delta_{\text{Día}}`;
+            latexFormula += ` ${coef.Coef_ADR >= 0 ? '+' : '-'} ${Math.abs(coef.Coef_ADR).toFixed(1)} A_{\\text{adr}}`;
+            latexFormula += ` + \\Delta_{\\text{Día}}`;
 
             formulaContainer.innerHTML = `$$${latexFormula}$$`;
 
