@@ -1387,7 +1387,7 @@
                         <i class="fa-solid fa-bolt" style="color: var(--success); font-size: 1.1rem;"></i>
                     </div>
                     <div style="flex: 1;">
-                        <div style="font-size: 0.75rem; color: var(--success); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;">Mejor Caso (Q1)</div>
+                        <div style="font-size: 0.75rem; color: var(--success); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;">Mejor Caso</div>
                         <div id="kpiMinLimpio" style="font-size: 1.6rem; font-weight: 800; font-family: 'Outfit', sans-serif; color: #34d399; line-height: 1.2;">-- min</div>
                     </div>
                 </div>
@@ -1398,7 +1398,7 @@
                         <i class="fa-solid fa-calculator" style="color: var(--primary); font-size: 1.1rem;"></i>
                     </div>
                     <div style="flex: 1;">
-                        <div style="font-size: 0.75rem; color: var(--primary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;">Caso Común (Mediana - Q2)</div>
+                        <div style="font-size: 0.75rem; color: var(--primary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;">Caso Común</div>
                         <div id="kpiMediaLimpia" style="font-size: 1.6rem; font-weight: 800; font-family: 'Outfit', sans-serif; color: #60a5fa; line-height: 1.2;">-- min</div>
                     </div>
                 </div>
@@ -1409,7 +1409,7 @@
                         <i class="fa-solid fa-circle-exclamation" style="color: var(--error); font-size: 1.1rem;"></i>
                     </div>
                     <div style="flex: 1;">
-                        <div style="font-size: 0.75rem; color: var(--error); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;">Peor Caso (P95)</div>
+                        <div style="font-size: 0.75rem; color: var(--error); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;">Peor Caso</div>
                         <div id="kpiMaxLimpio" style="font-size: 1.6rem; font-weight: 800; font-family: 'Outfit', sans-serif; color: #f87171; line-height: 1.2;">-- min</div>
                     </div>
                 </div>
@@ -1429,14 +1429,14 @@
                 <table class="partidas-table" id="tukeyPhaseTable">
                     <thead>
                         <tr>
-                            <th>Fase del Proceso</th>
+                            <th style="text-align: left;">Fase del Proceso</th>
                             <th style="text-align: right;">Registros Totales</th>
-                            <th style="text-align: right;">Límite Tukey ($L_{\text{Tukey}}$)</th>
-                            <th style="text-align: right;">Datos Usados (Limpios)</th>
-                            <th style="text-align: right;">Datos Excluidos (Aberrantes)</th>
-                            <th style="text-align: right;">Mejor Caso (Q1)</th>
-                            <th style="text-align: right;">Caso Común (Mediana)</th>
-                            <th style="text-align: right;">Peor Caso (P95)</th>
+                            <th style="text-align: right;">Límite de Tukey</th>
+                            <th style="text-align: right;">Datos Estándar</th>
+                            <th style="text-align: right;">Datos Tratados</th>
+                            <th style="text-align: right;">Mejor Caso</th>
+                            <th style="text-align: right;">Caso Común</th>
+                            <th style="text-align: right;">Peor Caso</th>
                         </tr>
                     </thead>
                     <tbody id="tukeyPhaseTableBody">
@@ -1503,13 +1503,13 @@
                     <table class="partidas-table">
                         <thead>
                             <tr>
-                                <th>Nº Partidas</th>
-                                <th style="text-align: right;">Total Registros</th>
+                                <th style="text-align: left;">Nº Partidas Físicas</th>
+                                <th style="text-align: right;">Volumen Muestral</th>
                                 <th style="text-align: right;">Datos Estándar</th>
-                                <th style="text-align: right;">Mejor Caso (Q1)</th>
-                                <th style="text-align: right;">Caso Común (Mediana)</th>
-                                <th style="text-align: right;">Peor Caso (P95)</th>
-                                <th style="text-align: right;">Umbral Tukey</th>
+                                <th style="text-align: right;">Mejor Caso</th>
+                                <th style="text-align: right;">Caso Común</th>
+                                <th style="text-align: right;">Peor Caso</th>
+                                <th style="text-align: right;">Límite de Tukey</th>
                             </tr>
                         </thead>
                         <tbody id="partidasTableBody">
@@ -1620,7 +1620,6 @@
                 <div class="playbook-section">
                     <div class="playbook-text">
                         <p><strong>Limpieza de Datos mediante Límites de Tukey:</strong></p>
-                        <p>Para evitar que retrasos sistemáticos (sesiones RF que los operarios olvidan cerrar en el sistema ERP durante horas o días) alteren las métricas, se aplica una metodología estadística robusta no paramétrica basada en cuartiles en lugar de desviación estándar.</p>
                         <p>El Rango Intercuartílico (IQR) mide la dispersión del 50% central de los datos. La valla superior o <strong>Límite de Tukey</strong> define el umbral a partir del cual un registro es considerado ruido/error sistémico:</p>
                         <ul>
                             <li><strong>$Q1$ (Cuartil 1):</strong> 25% de los datos duran menos que este valor.</li>
@@ -1649,7 +1648,7 @@
                         <p><strong>Hallazgos Operativos de Muelle Auditado:</strong></p>
                         <p>El análisis de la serie de exportaciones revela comportamientos estructurales clave del negocio:</p>
                         <p><strong>1. Recepción y Volumétrica (Fase 1):</strong> Muestra una correlación lineal casi nula ($r \approx 0.06 - 0.10$) entre el número de partidas y la duración en Barcelona y Valencia. El cuello de botella es la descarga, no el peso/medición. Sin embargo, <strong>Alicante (ALC)</strong> colapsa los Jueves y Viernes aumentando su tiempo medio limpio en más de 43 minutos ($+43.39\text{ min}$), sugiriendo saturación física de layout.</p>
-                        <p><strong>2. Tramitación Administrativa (Fase 2):</strong> La validación de declaraciones de mercancías peligrosas (ADR) ante la aduana y naviera genera una pérdida severa de trazabilidad. En BCN, la presencia de ADR añade un costo neto administrativo de 48 minutos y desploma la tasa de rescate estándar a tiempo del $92\%$ a un crítico $35\%$.</p>
+                        <p><strong>2. Tramitación Administrativa (Fase 2):</strong> La validación de declaraciones de mercancías peligrosas (ADR) ante la aduana y naviera genera una pérdida severa de trazabilidad. En BCN, la presencia de ADR añade un costo neto administrativo de 48 minutos y desploma la tasa de rescate estándar a tiempo del $92\%$ a un crítico $35\%$ .</p>
                         <p><strong>3. Carga en Almacén y Estiba (Fase 3):</strong> Durante los días pico (J-V) se produce el fenómeno de la "presión del ferry". Para no perder el zarpe del barco del fin de semana, la estiba física se acelera, reduciendo la duración del proceso en BCN en casi 2 horas, pero a costo de disparar los errores de registro (olvidos de lectura de radiofrecuencia) del $7.5\%$ al $20.27\%$ de outliers.</p>
                     </div>
                     <div class="playbook-text">
@@ -1666,17 +1665,8 @@
             <div id="tabRegresion" class="tab-content">
                 <div class="playbook-section">
                     <div class="playbook-text">
-                        <p><strong>Modelado de Regresión por Mínimos Cuadrados Ordinarios (OLS):</strong></p>
-                        <p>Se utiliza una regresión lineal con variables categóricas (dummies) para predecir la duración del muelle limpio:</p>
-                        <p>$$\hat{Y} = \beta_0 + \beta_1 X_{\text{Partidas}} + \beta_2 D_{\text{Día}} + \beta_3 A_{\text{ADR}}$$</p>
-                        <p>Donde las variables se codifican de la siguiente manera:</p>
-                        <ul>
-                            <li><strong>$X_{\text{Partidas}}$:</strong> Variable cuantitativa del número total de partidas físicas.</li>
-                            <li><strong>$D_{\text{Día}}$:</strong> Variable binaria temporal ($0$ para días ordinarios L-X, $1$ para días pico de ferry J-V).</li>
-                            <li><strong>$A_{\text{ADR}}$:</strong> Variable binaria de seguridad ($0$ para carga general, $1$ para mercancía peligrosa ADR).</li>
-                            <li><strong>$\beta_0$ (Intercepto):</strong> Tiempo muerto fijo de preparación, acople y tramitación inicial.</li>
-                            <li><strong>$\beta_n$:</strong> Coeficiente de impacto marginal neto para cada factor correspondiente.</li>
-                        </ul>
+                        <p><strong>Alineación de Hallazgos:</strong></p>
+                        <p>El simulador en tiempo real proporciona una visión clara del comportamiento temporal basado estrictamente en el histórico de datos. Estos modelos descriptivos ayudan a inferir cuánto impacto neto tiene cada variable en los tiempos de muelle, permitiendo aislar los cuellos de botella sin introducir suposiciones de procesos ajenos al flujo documentado.</p>
                     </div>
                     <div class="card" style="background: rgba(15, 23, 42, 0.4); border-color: rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1.5rem;">
                         <p style="font-weight: 600; color: var(--info); margin-bottom: 0.5rem; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em;">Alineación de Variables</p>
