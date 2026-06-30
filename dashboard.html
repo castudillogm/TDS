@@ -2448,6 +2448,17 @@
                         }
                         
                         const processedRecords = rawRecords.map(r => {
+                            // Helper to find key case-insensitively and ignoring spaces
+                            const getVal = (keys, def) => {
+                                for (let k in r) {
+                                    let normK = k.replace(/\s+/g, '').toUpperCase();
+                                    for (let pk of keys) {
+                                        if (normK === pk.toUpperCase()) return r[k];
+                                    }
+                                }
+                                return def;
+                            };
+
                             const cod = r.Codigo ? r.Codigo.toString() : '';
                             const fechaVal = r.FechaExpedicion; // Pass exactly what XLSX gave us (could be Number or String)
                             const dayInt = getDayIntFromFecha(fechaVal);
@@ -2459,23 +2470,31 @@
                             const adrStr = adrBin === 1 ? 'SI' : 'NO';
                             
                             // Parse optional parent phase column or default to 2 - EXPORTACION
-                            const fpVal = r.FasePadre ? r.FasePadre.toString().trim() : '2 - EXPORTACION';
+                            const fpRaw = getVal(['FasePadre'], '2 - EXPORTACION');
+                            const fpVal = fpRaw ? fpRaw.toString().trim() : '2 - EXPORTACION';
                             
                             // Classification of Zone
-                            const dest = r.PlazaDestino ? r.PlazaDestino.toString().toUpperCase().trim() : '';
-                            const orig = r.PlazaOrigen ? r.PlazaOrigen.toString().toUpperCase().trim() : '';
+                            const destRaw = getVal(['PlazaDestino', 'Destino'], '');
+                            const dest = destRaw ? destRaw.toString().toUpperCase().trim() : '';
+                            
+                            const origRaw = getVal(['PlazaOrigen', 'Origen'], '');
+                            const orig = origRaw ? origRaw.toString().toUpperCase().trim() : '';
+                            
                             const baleares = ['PMI', 'MAH', 'IBZ'];
                             const canarias = ['LPA', 'ACE', 'TFN', 'TFS', 'TCI', 'FUE', 'SPC', 'SCT'];
                             
                             let zonaOrigenAsignada = 'Península';
-                            if (baleares.includes(orig)) zonaOrigenAsignada = 'Baleares';
+                            if (orig === '') zonaOrigenAsignada = 'Sin Asignar';
+                            else if (baleares.includes(orig)) zonaOrigenAsignada = 'Baleares';
                             else if (canarias.includes(orig)) zonaOrigenAsignada = 'Canarias';
 
                             let zonaDestinoAsignada = 'Península';
-                            if (baleares.includes(dest)) zonaDestinoAsignada = 'Baleares';
+                            if (dest === '') zonaDestinoAsignada = 'Sin Asignar';
+                            else if (baleares.includes(dest)) zonaDestinoAsignada = 'Baleares';
                             else if (canarias.includes(dest)) zonaDestinoAsignada = 'Canarias';
                             
-                            const completoBin = (r.Completo && r.Completo.toString().toUpperCase().trim() === 'SI') ? 1 : 0;
+                            const compRaw = getVal(['Completo'], '');
+                            const completoBin = (compRaw && compRaw.toString().toUpperCase().trim() === 'SI') ? 1 : 0;
                             const completoStr = completoBin === 1 ? 'SI' : 'NO';
                             
                             return {
