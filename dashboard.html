@@ -3026,6 +3026,17 @@
 
         // Reset all filters to default
         function resetAllFilters() {
+            activeZonaOrigen = "ALL";
+            activePlazaOrigen = "ALL";
+            activeZonaDestino = "ALL";
+            activePlazaDestino = "ALL";
+            
+            // Re-render plaza buttons completely to show all plazas again
+            if (isCustomDatasetLoaded) {
+                renderDynamicPlazaButtons('origen', CUSTOM_RECORDS, 'ALL');
+                renderDynamicPlazaButtons('destino', CUSTOM_RECORDS, 'ALL');
+            }
+
             document.querySelectorAll('.plaza-btn').forEach(btn => {
                 if (btn.getAttribute('data-value') === 'ALL') {
                     btn.classList.add('active');
@@ -3033,10 +3044,6 @@
                     btn.classList.remove('active');
                 }
             });
-            activeZonaOrigen = "ALL";
-            activePlazaOrigen = "ALL";
-            activeZonaDestino = "ALL";
-            activePlazaDestino = "ALL";
 
             if (document.getElementById('filterFase')) {
                 const ff = document.getElementById('filterFase');
