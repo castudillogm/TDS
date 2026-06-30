@@ -1385,7 +1385,7 @@
                 <select id="filterCompleto" class="filter-select" onchange="updateDashboard()">
                     <option value="ALL">Todos</option>
                     <option value="SI">Sí (Completos)</option>
-                    <option value="NO">No (Incompletos)</option>
+                    <option value="NO">No (Grupaje)</option>
                 </select>
             </div>
 
@@ -1503,6 +1503,7 @@
                             <th style="text-align: right;">Peor Caso</th>
                         </tr>
                     </thead>
+                    <tbody id="tukeyPhaseTableBody">
                     </tbody>
                 </table>
             </div>
@@ -1624,7 +1625,7 @@
             </div>
 
             <!-- Interactive Predictor Simulator -->
-            <div class="card card-accent-success simulator-panel">
+            <div class="card card-accent-success simulator-panel" style="display: none;">
                 <div class="card-title">
                     <span>Simulador de Tiempos de Muelle (Predicción)</span>
                     <i class="fa-solid fa-gamepad"></i>
@@ -2541,10 +2542,16 @@
         // --- REMOTE CONNECTION LOGIC ---
         function connectRemoteExcel() {
             const input = document.getElementById('remoteUrlInput');
-            const url = input.value.trim();
+            let url = input.value.trim();
             if (!url) {
-                alert("Por favor, introduce un link válido.");
-                return;
+                const savedUrl = localStorage.getItem('remoteExcelUrl');
+                if (savedUrl) {
+                    url = savedUrl;
+                    input.value = url;
+                } else {
+                    alert("Por favor, introduce un link válido.");
+                    return;
+                }
             }
             localStorage.setItem('remoteExcelUrl', url);
             fetchExcelFromUrl(url);
@@ -2576,11 +2583,12 @@
                 
                 const arrayBuffer = await response.arrayBuffer();
                 
-                setTimeout(() => {
+                setTimeout(async () => {
                     try {
                         const data = new Uint8Array(arrayBuffer);
+                        // Using async to unblock UI thread
                         const workbook = XLSX.read(data, { type: 'array' });
-                        processParsedWorkbook(workbook);
+                        await processParsedWorkbook(workbook);
                     } catch(err) {
                         hideLoader();
                         alert(`Error al procesar los datos: ${err.message}`);
@@ -2594,9 +2602,12 @@
             }
         }
 
-        function processParsedWorkbook(workbook) {
+        async function processParsedWorkbook(workbook) {
             const firstSheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[firstSheetName];
+            
+            await new Promise(r => setTimeout(r, 10)); // Yield to UI thread
+            
             const rawRecords = XLSX.utils.sheet_to_json(worksheet);
             
             if (rawRecords.length === 0) {
@@ -2609,6 +2620,8 @@
             if (missing.length > 0) {
                 throw new Error(`Faltan columnas obligatorias: ${missing.join(', ')}`);
             }
+            
+            await new Promise(r => setTimeout(r, 10)); // Yield to UI thread
             
             const processedRecords = rawRecords.map(r => {
                 const cod = r.Codigo ? r.Codigo.toString() : '';
@@ -2628,7 +2641,7 @@
                 const dest = r.PlazaDestino ? r.PlazaDestino.toString().toUpperCase().trim() : '';
                 const orig = r.PlazaOrigen ? r.PlazaOrigen.toString().toUpperCase().trim() : '';
                 const baleares = ['PMI', 'MAH', 'IBZ'];
-                const canarias = ['LPA', 'ACE', 'TFN', 'TFS', 'TCI', 'FUE', 'SPC'];
+                const canarias = ['LPA', 'ACE', 'TFN', 'TFS', 'TCI', 'FUE', 'SPC', 'SCT'];
                 
                 let zonaOrig = 'Península';
                 if (baleares.includes(orig)) {
@@ -2660,22 +2673,30 @@
                     Dia: diaReal,
                     Dia_Int: dayInt,
                     Dia_Binario: diaBin,
-                    Dia_Grupo: diaGrp
+                    Dia_Grupo: diaGrp,
+                    Completo: r.Completo ? r.Completo.toString().toUpperCase().trim() : 'ALL'
                 };
             });
             
             if (!ORIGINAL_DASHBOARD_STATS) {
-                ORIGINAL_DASHBOARD_STATS = JSON.parse(JSON.stringify(DASHBOARD_STATS));
-                ORIGINAL_REGRESIONES_STATS = JSON.parse(JSON.stringify(REGRESIONES_STATS));
-                ORIGINAL_PARTIDAS_STATS = JSON.parse(JSON.stringify(PARTIDAS_STATS));
+                ORIGINAL_DASHBOARD_STATS = typeof DASHBOARD_STATS !== 'undefined' ? JSON.parse(JSON.stringify(DASHBOARD_STATS)) : {};
+                ORIGINAL_REGRESIONES_STATS = typeof REGRESIONES_STATS !== 'undefined' ? JSON.parse(JSON.stringify(REGRESIONES_STATS)) : [];
+                ORIGINAL_PARTIDAS_STATS = typeof PARTIDAS_STATS !== 'undefined' ? JSON.parse(JSON.stringify(PARTIDAS_STATS)) : [];
             }
             
             isCustomDatasetLoaded = true;
             CUSTOM_RECORDS = processedRecords;
             
+            await new Promise(r => setTimeout(r, 10)); // Yield to UI thread
+            
             // Show the app body and hide the welcome screen
             document.getElementById('dashboardAppBody').style.display = 'block';
             document.getElementById('welcomeScreen').style.display = 'none';
+            
+            // Force charts to resize after container becomes visible
+            if (typeof mainChartInstance !== 'undefined' && mainChartInstance) mainChartInstance.resize();
+            if (typeof stabilityChartInstance !== 'undefined' && stabilityChartInstance) stabilityChartInstance.resize();
+            if (typeof paretoChartInstance !== 'undefined' && paretoChartInstance) paretoChartInstance.resize();
             
             // Render dynamic plaza buttons based on available options
             renderDynamicPlazaButtons('origen', processedRecords, activeZonaOrigen);
@@ -2684,14 +2705,20 @@
             // Dynamically populate parent phases
             updateFilterFasePadreDropdown(processedRecords);
             
+            await new Promise(r => setTimeout(r, 20)); // Yield to UI thread
+            
             recalculateAllDashboardStats(processedRecords);
             
+            await new Promise(r => setTimeout(r, 20)); // Yield to UI thread
+            
             document.getElementById('btnResetDefault').style.display = 'inline-flex';
-            document.getElementById('loaderOverlay').classList.remove('show');
-            showToast(`¡Datos remotos conectados! ${processedRecords.length.toLocaleString()} registros procesados.`);
             
             // Force dashboard update
             updateDashboard();
+            
+            document.getElementById('loaderOverlay').classList.remove('show');
+            if (typeof loaderTimerInterval !== 'undefined') clearInterval(loaderTimerInterval);
+            showToast(`¡Datos remotos conectados! ${processedRecords.length.toLocaleString()} registros procesados.`);
         }
 
         // Active Filter States
@@ -3017,6 +3044,10 @@
 
         // Update dashboard KPIs, Charts, Regressions, and Predictor
         function updateDashboard() {
+            if (!isCustomDatasetLoaded && typeof DASHBOARD_STATS === 'undefined') {
+                return; // Wait until data is loaded
+            }
+
             const selFasePadre = document.getElementById('filterFasePadre') ? Array.from(document.getElementById('filterFasePadre').selectedOptions).map(o => o.value) : ['ALL'];
             activeFasePadre = 'ALL';
             if (!selFasePadre.includes('ALL') && selFasePadre.length > 0) activeFasePadre = selFasePadre.sort().join(',');
@@ -3192,7 +3223,13 @@
 
             let phasesList = [];
             if (isCustomDatasetLoaded) {
-                const uniquePhases = [...new Set(CUSTOM_RECORDS.map(r => r.Fase))].filter(Boolean);
+                let relevantRecords = CUSTOM_RECORDS;
+                if (activeFasePadre !== "ALL") {
+                    const fpArr = activeFasePadre.split(',');
+                    relevantRecords = CUSTOM_RECORDS.filter(r => fpArr.includes(r.FasePadre));
+                }
+                const uniquePhases = [...new Set(relevantRecords.map(r => r.Fase))].filter(Boolean);
+                
                 phasesList = uniquePhases.map(p => ({
                     id: p,
                     label: p.toLowerCase().includes('recepcion') ? 'Recepción Mercancía Almacén' :
@@ -3434,7 +3471,8 @@
                     predictiveSection.style.display = 'none';
                     return;
                 } else {
-                    predictiveSection.style.display = 'grid';
+                    predictiveSection.style.display = 'none';
+                    // evaluatePredictorRealtime();
                 }
             }
             
