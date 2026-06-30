@@ -3023,6 +3023,18 @@
             document.getElementById('filterDia').value = "ALL";
             document.getElementById('filterADR').value = "ALL";
             
+            if (document.getElementById('filterFasePadre')) {
+                const fp = document.getElementById('filterFasePadre');
+                Array.from(fp.options).forEach(opt => opt.selected = (opt.value === 'ALL'));
+            }
+            if (document.getElementById('filterCompleto')) {
+                document.getElementById('filterCompleto').value = "ALL";
+            }
+            if (document.getElementById('filterPareto')) {
+                document.getElementById('filterPareto').value = 100;
+                document.getElementById('paretoPctLabel').innerText = '100%';
+            }
+            
             updateDashboard();
             showToast("Filtros restablecidos correctamente");
         }
