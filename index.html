@@ -248,10 +248,10 @@
 
         /* Container Layout */
         .container {
-            max-width: 96%;
-            width: 1720px;
+            width: 100%;
+            max-width: 100%;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 1.5rem 2%;
         }
 
         /* Header Style */
@@ -1258,13 +1258,31 @@
             <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); display: flex; align-items: center; justify-content: center; box-shadow: var(--glow-success);">
                 <i class="fa-solid fa-file-excel" style="color: var(--success); font-size: 2.5rem;"></i>
             </div>
-            <div style="max-width: 600px;">
+            <div style="max-width: 600px; width: 100%;">
                 <h2 style="font-size: 2rem; font-weight: 800; color: var(--text-primary); margin-bottom: 1rem; font-family: 'Outfit', sans-serif;">TDS: TIEMPOS DE SERVICIO LOGISTICO GRUPAMAR</h2>
                 <p style="font-size: 1rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 2rem;">
-                    Bienvenido a la plataforma premium de modelado matemático de TDS Logística. Para comenzar a analizar los tiempos de proceso, límites de Tukey, percentiles de flujo y coeficientes de regresión OLS multivariable en caliente, por favor carga tu archivo de datos de Excel (`.xlsx`, `.xls`).
+                    Bienvenido a la plataforma premium de modelado matemático de TDS Logística. Para comenzar a analizar los tiempos de proceso, límites de Tukey, percentiles de flujo y coeficientes de regresión OLS multivariable en caliente, ingresa el enlace de datos o carga tu archivo de datos de Excel (`.xlsx`, `.xls`).
                 </p>
+
+                <!-- Conexión Remota -->
+                <div style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.05); text-align: left;">
+                    <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">1. Conexión Remota Automática (Recomendado)</label>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.8rem; margin-top: 0.2rem;">Pega el enlace a Google Drive u origen web. Se mantendrá guardado para tu próxima sesión.</p>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="remoteUrlInput" placeholder="https://docs.google.com/spreadsheets/d/.../export?format=xlsx" oninput="localStorage.setItem('remoteExcelUrl', this.value.trim());" style="flex: 1; padding: 0.8rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: var(--bg-main); color: var(--text-primary); outline: none;">
+                        <button class="btn btn-success" onclick="connectRemoteExcel()" style="padding: 0 1.5rem;">
+                            <i class="fa-solid fa-link"></i> Conectar
+                        </button>
+                    </div>
+                </div>
+
+                <div style="margin: 1.5rem 0; position: relative; text-align: center;">
+                    <span style="background: rgba(17, 24, 39, 0.45); padding: 0 1rem; position: relative; z-index: 1; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">O sube el archivo manualmente</span>
+                    <div style="position: absolute; top: 50%; left: 0; right: 0; border-top: 1px dashed rgba(255,255,255,0.1); z-index: 0;"></div>
+                </div>
+
                 <label class="btn btn-primary" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.9rem 2.2rem; font-size: 1.1rem; border-radius: 0.6rem; font-weight: 600; box-shadow: var(--glow-primary); transition: var(--transition-smooth);">
-                    <i class="fa-solid fa-file-import" style="font-size: 1.2rem;"></i> Cargar Archivo de Excel
+                    <i class="fa-solid fa-file-import" style="font-size: 1.2rem;"></i> 2. Cargar Archivo Manual (.xlsx)
                     <input type="file" id="welcomeExcelFileInput" accept=".xlsx, .xls" style="display: none;" onchange="handleExcelUpload(event)">
                 </label>
                 <div style="margin-top: 1.5rem;">
@@ -1276,30 +1294,62 @@
         </div>
 
         <div id="dashboardAppBody" style="display: none;">
-            <!-- Plaza Origen Selector (Horizontal Tabbed style for Premium UI) -->
-            <div class="no-print">
-                <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em;">Plaza de Origen</div>
-            <div class="plaza-selector" id="plazaSelectorContainer">
-                <button class="plaza-btn active" data-value="ALL"><i class="fa-solid fa-globe"></i> Todas las Plazas</button>
-                <button class="plaza-btn" data-value="ALC"><i class="fa-solid fa-warehouse"></i> Alicante (ALC)</button>
-                <button class="plaza-btn" data-value="BCN"><i class="fa-solid fa-warehouse"></i> Barcelona (BCN)</button>
-                <button class="plaza-btn" data-value="VLC"><i class="fa-solid fa-warehouse"></i> Valencia (VLC)</button>
+            <!-- Geographic Selectors (Premium UI Grid) -->
+            <div class="no-print" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem; padding: 1.5rem; background: rgba(0,0,0,0.15); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                
+                <!-- ORIGEN -->
+                <div>
+                    <div style="font-size: 0.9rem; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;"><i class="fa-solid fa-ship"></i> ORIGEN</div>
+                    
+                    <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 0.5rem;">Zona Origen</div>
+                    <div class="plaza-selector" id="zonaOrigenContainer" style="margin-bottom: 1rem;">
+                        <button class="plaza-btn active" data-type="zona-origen" data-value="ALL"><i class="fa-solid fa-earth-europe"></i> Todas</button>
+                        <button class="plaza-btn" data-type="zona-origen" data-value="Península"><i class="fa-solid fa-map-location-dot"></i> Península</button>
+                        <button class="plaza-btn" data-type="zona-origen" data-value="Baleares"><i class="fa-solid fa-umbrella-beach"></i> Baleares</button>
+                        <button class="plaza-btn" data-type="zona-origen" data-value="Canarias"><i class="fa-solid fa-volcano"></i> Canarias</button>
+                    </div>
+
+                    <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 0.5rem;">Plaza Origen</div>
+                    <div class="plaza-selector" id="plazaOrigenContainer">
+                        <button class="plaza-btn active" data-type="plaza-origen" data-value="ALL"><i class="fa-solid fa-globe"></i> Todas las Plazas</button>
+                        <!-- Dynamic buttons -->
+                    </div>
+                </div>
+
+                <!-- DESTINO -->
+                <div>
+                    <div style="font-size: 0.9rem; font-weight: 700; color: var(--warning); text-transform: uppercase; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;"><i class="fa-solid fa-ship"></i> DESTINO</div>
+                    
+                    <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 0.5rem;">Zona Destino</div>
+                    <div class="plaza-selector" id="zonaDestinoContainer" style="margin-bottom: 1rem;">
+                        <button class="plaza-btn active" data-type="zona-destino" data-value="ALL"><i class="fa-solid fa-earth-europe"></i> Todas</button>
+                        <button class="plaza-btn" data-type="zona-destino" data-value="Península"><i class="fa-solid fa-map-location-dot"></i> Península</button>
+                        <button class="plaza-btn" data-type="zona-destino" data-value="Baleares"><i class="fa-solid fa-umbrella-beach"></i> Baleares</button>
+                        <button class="plaza-btn" data-type="zona-destino" data-value="Canarias"><i class="fa-solid fa-volcano"></i> Canarias</button>
+                    </div>
+
+                    <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 0.5rem;">Plaza Destino</div>
+                    <div class="plaza-selector" id="plazaDestinoContainer">
+                        <button class="plaza-btn active" data-type="plaza-destino" data-value="ALL"><i class="fa-solid fa-globe"></i> Todas las Plazas</button>
+                        <!-- Dynamic buttons -->
+                    </div>
+                </div>
+
             </div>
-        </div>
 
         <!-- Filter Controls -->
         <div class="filters-container no-print">
             <div class="filter-group" id="filterFasePadreGroup" style="display: none;">
-                <label for="filterFasePadre"><i class="fa-solid fa-folder-tree"></i> Fase Padre</label>
-                <select id="filterFasePadre" class="filter-select" onchange="updateDashboard()">
-                    <option value="ALL">Todas las Fases Padres</option>
+                <label for="filterFasePadre"><i class="fa-solid fa-folder-tree"></i> Fase Padre (Ctrl+Click)</label>
+                <select id="filterFasePadre" class="filter-select" multiple size="3" style="height: auto; padding: 0.5rem;" onchange="updateDashboard()">
+                    <option value="ALL" selected>Todas las Fases Padres</option>
                 </select>
             </div>
 
             <div class="filter-group">
-                <label for="filterFase"><i class="fa-solid fa-arrows-spin"></i> Fase del Proceso</label>
-                <select id="filterFase" class="filter-select" onchange="updateDashboard()">
-                    <option value="ALL">Todas las Fases</option>
+                <label for="filterFase"><i class="fa-solid fa-arrows-spin"></i> Fase del Proceso (Ctrl+Click)</label>
+                <select id="filterFase" class="filter-select" multiple size="5" style="height: auto; padding: 0.5rem;" onchange="updateDashboard()">
+                    <option value="ALL" selected>Todas las Fases</option>
                     <option value="RECEPCION MERCANCIA ALMACEN ORIGEN">Recepción Mercancía Almacén</option>
                     <option value="CARGA ALMACEN ORIGEN">Carga / Estiba de Contenedor</option>
                     <option value="DOCUMENTACION">Fase Documental (Aduana/SLA)</option>
@@ -1328,6 +1378,20 @@
                     <option value="SI">Sólo ADR (Mercancía Peligrosa)</option>
                     <option value="NO">Sin ADR (Mercancía Común)</option>
                 </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="filterCompleto"><i class="fa-solid fa-clipboard-check"></i> Completo</label>
+                <select id="filterCompleto" class="filter-select" onchange="updateDashboard()">
+                    <option value="ALL">Todos</option>
+                    <option value="SI">Sí (Completos)</option>
+                    <option value="NO">No (Incompletos)</option>
+                </select>
+            </div>
+
+            <div class="filter-group" style="padding-top: 5px;">
+                <label for="filterPareto" style="display:flex; justify-content:space-between;"><span style="color:var(--text-secondary);"><i class="fa-solid fa-filter-circle-dollar"></i> Foco Pareto: </span> <span id="paretoPctLabel" style="color:var(--warning); font-weight:bold;">100%</span></label>
+                <input type="range" id="filterPareto" class="filter-select" min="10" max="100" value="100" step="5" onchange="updateDashboard()" oninput="document.getElementById('paretoPctLabel').innerText = this.value + '%'" style="width: 100%; cursor: pointer;">
             </div>
         </div>
 
@@ -1439,8 +1503,6 @@
                             <th style="text-align: right;">Peor Caso</th>
                         </tr>
                     </thead>
-                    <tbody id="tukeyPhaseTableBody">
-                        <!-- Dynamically loaded -->
                     </tbody>
                 </table>
             </div>
@@ -1484,8 +1546,9 @@
             </div>
         </div>
 
-        <!-- Segregación por Partidas Section -->
-        <div class="card card-accent-primary" style="margin-bottom: 2rem;">
+        <!-- Segregación por Partidas Section and Pareto Chart -->
+        <div class="charts-row" style="margin-bottom: 2rem;">
+            <div class="card card-accent-primary" style="flex: 2;">
             <div class="card-title">
                 <span>Análisis General de Tiempos Segregado por Partidas Físicas</span>
                 <i class="fa-solid fa-boxes-stacked"></i>
@@ -1518,10 +1581,24 @@
                     </table>
                 </div>
             </div>
+            </div>
+
+            <div class="card card-accent-warning" style="flex: 1; display: flex; flex-direction: column;">
+                <div class="card-title">
+                    <span>Curva Pareto (80/20) - Volumen por Partidas</span>
+                    <i class="fa-solid fa-chart-simple"></i>
+                </div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                    Identifica el <span style="color: var(--warning); font-weight: bold;">Top 80%</span> del volumen operativo.
+                </div>
+                <div class="chart-container" style="flex: 1; min-height: 250px; position: relative;">
+                    <canvas id="paretoChart"></canvas>
+                </div>
+            </div>
         </div>
 
         <!-- Predictive Modeling and Linear Regression -->
-        <div class="analisis-grid" id="predictiveModelingSection">
+        <div class="analisis-grid" id="predictiveModelingSection" style="display: none;">
             
             <!-- Regression Model Display -->
             <div class="card card-accent-primary">
@@ -1697,6 +1774,34 @@
 
 
     <script>
+        // --- LOADER TIMER LOGIC ---
+        let loaderTimerInterval = null;
+        let loaderStartTime = 0;
+
+        function showLoader() {
+            document.getElementById('loaderOverlay').classList.add('show');
+            const timerEl = document.getElementById('loaderTimer');
+            if (timerEl) {
+                timerEl.innerText = "00:00";
+                loaderStartTime = Date.now();
+                if (loaderTimerInterval) clearInterval(loaderTimerInterval);
+                loaderTimerInterval = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - loaderStartTime) / 1000);
+                    const mins = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                    const secs = (elapsed % 60).toString().padStart(2, '0');
+                    timerEl.innerText = `${mins}:${secs}`;
+                }, 1000);
+            }
+        }
+
+        function hideLoader() {
+            document.getElementById('loaderOverlay').classList.remove('show');
+            if (loaderTimerInterval) {
+                clearInterval(loaderTimerInterval);
+                loaderTimerInterval = null;
+            }
+        }
+
         // Helper to format numbers cleanly with exactly 'dec' decimals (including .00 for integers)
         function formatNum(val, dec = 2) {
             if (val === undefined || val === null || isNaN(val)) return '--';
@@ -1751,13 +1856,31 @@
             return h % 5; // 0: Lunes, 1: Martes, etc.
         }
 
-        // Get actual weekday index (0-6) from FechaExpedicion string
-        function getDayIntFromFecha(fechaStr) {
-            if (fechaStr === undefined || fechaStr === null) return 0;
+        // Get actual weekday index (0-6) from FechaExpedicion
+        function getDayIntFromFecha(fechaVal) {
+            if (fechaVal === undefined || fechaVal === null || fechaVal === '') return 0;
+            
             try {
-                const cleanStr = fechaStr.toString().trim();
-                const datePart = cleanStr.split(' ')[0]; // Take "260112"
-                if (datePart.length >= 6) {
+                // Si es un número (Fecha serial de Excel)
+                if (typeof fechaVal === 'number') {
+                    // Excel dates are days since Dec 30, 1899
+                    const date = new Date(Math.round((fechaVal - 25569) * 86400 * 1000));
+                    const jsDay = date.getDay(); // 0: Sun, 1: Mon
+                    return jsDay === 0 ? 6 : jsDay - 1;
+                }
+                
+                // Si es un string Date real ISO (ej. 2026-01-12)
+                if (fechaVal instanceof Date) {
+                    const jsDay = fechaVal.getDay();
+                    return jsDay === 0 ? 6 : jsDay - 1;
+                }
+
+                // Parse manual string
+                const cleanStr = fechaVal.toString().trim();
+                
+                // Intenta formato directo yyMMdd HH:mm ("260112 08:46")
+                const datePart = cleanStr.split(' ')[0];
+                if (datePart.length >= 6 && !datePart.includes('-') && !datePart.includes('/')) {
                     const yy = parseInt(datePart.substring(0, 2));
                     const mm = parseInt(datePart.substring(2, 4)) - 1; // 0-indexed in JS
                     const dd = parseInt(datePart.substring(4, 6));
@@ -1765,9 +1888,17 @@
                     if (!isNaN(yy) && !isNaN(mm) && !isNaN(dd)) {
                         const date = new Date(2000 + yy, mm, dd);
                         const jsDay = date.getDay(); // 0: Sunday, 1: Monday, ...
-                        return jsDay === 0 ? 6 : jsDay - 1; // Map Sunday to 6, others to jsDay-1
+                        return jsDay === 0 ? 6 : jsDay - 1;
                     }
                 }
+                
+                // Intenta fallback a formato ISO o string leíble por Date()
+                const standardDate = new Date(cleanStr);
+                if (!isNaN(standardDate.getTime())) {
+                    const jsDay = standardDate.getDay();
+                    return jsDay === 0 ? 6 : jsDay - 1;
+                }
+                
             } catch (err) {
                 console.error("Error parsing FechaExpedicion:", err);
             }
@@ -1989,32 +2120,78 @@
             source.forEach(item => target.push(item));
         }
 
-        // Render origin plazas selector dynamically
-        function renderPlazaSelector(plazas) {
-            const container = document.getElementById('plazaSelectorContainer');
+        // Render dynamic buttons for Plazas (Origen / Destino)
+        function renderDynamicPlazaButtons(typeStr, records, currentZona) {
+            // typeStr is 'origen' or 'destino'
+            const containerId = typeStr === 'origen' ? 'plazaOrigenContainer' : 'plazaDestinoContainer';
+            const attrZona = typeStr === 'origen' ? 'ZonaOrigen' : 'ZonaDestino';
+            const attrPlaza = typeStr === 'origen' ? 'PlazaOrigen' : 'PlazaDestino';
+            const btnDataType = typeStr === 'origen' ? 'plaza-origen' : 'plaza-destino';
+            
+            // Get active value
+            const activeValue = typeStr === 'origen' ? activePlazaOrigen : activePlazaDestino;
+            
+            const container = document.getElementById(containerId);
             if (!container) return;
 
-            let html = `<button class="plaza-btn ${activePlaza === 'ALL' ? 'active' : ''}" data-value="ALL"><i class="fa-solid fa-globe"></i> Todas las Plazas</button>`;
+            let filteredPlazas = [];
+            if (currentZona === 'ALL') {
+                filteredPlazas = [...new Set(records.map(r => r[attrPlaza]))].filter(Boolean);
+            } else {
+                filteredPlazas = [...new Set(records.filter(r => r[attrZona] === currentZona).map(r => r[attrPlaza]))].filter(Boolean);
+            }
+
+            let html = `<button class="plaza-btn ${activeValue === 'ALL' ? 'active' : ''}" data-type="${btnDataType}" data-value="ALL"><i class="fa-solid fa-globe"></i> Todas las Plazas</button>`;
             
-            const sortedPlazas = plazas.slice().sort();
+            const sortedPlazas = filteredPlazas.slice().sort();
             sortedPlazas.forEach(plaza => {
-                const isActive = (activePlaza === plaza) ? 'active' : '';
-                html += `<button class="plaza-btn ${isActive}" data-value="${plaza}"><i class="fa-solid fa-warehouse"></i> ${plaza}</button>`;
+                const isActive = (activeValue === plaza) ? 'active' : '';
+                html += `<button class="plaza-btn ${isActive}" data-type="${btnDataType}" data-value="${plaza}"><i class="fa-solid fa-warehouse"></i> ${plaza}</button>`;
             });
 
             container.innerHTML = html;
+        }
 
-            const buttons = container.querySelectorAll('.plaza-btn');
-            buttons.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    buttons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    activePlaza = btn.getAttribute('data-value');
-                    
-                    syncSimulatorControls();
-                    updateDashboard();
-                    showToast(`Plaza de Origen cambiada a: ${btn.innerText}`);
-                });
+        // Initialize Global Event Listeners for ALL .plaza-btn buttons using event delegation
+        function initGeographicSelectors() {
+            // We use document-level delegation to handle dynamic buttons efficiently
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('.plaza-btn');
+                if (!btn) return;
+                
+                const type = btn.getAttribute('data-type');
+                const val = btn.getAttribute('data-value');
+                if(!type) return; // Ignore legacy buttons without type
+
+                // UI Update for sibling buttons in the same container
+                const container = btn.parentElement;
+                container.querySelectorAll('.plaza-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // State Updates
+                if (type === 'zona-origen') {
+                    activeZonaOrigen = val;
+                    activePlazaOrigen = 'ALL'; // Reset
+                    renderDynamicPlazaButtons('origen', CUSTOM_RECORDS, activeZonaOrigen);
+                    showToast(`Zona Origen: ${btn.innerText}`);
+                } 
+                else if (type === 'plaza-origen') {
+                    activePlazaOrigen = val;
+                    showToast(`Plaza Origen: ${btn.innerText}`);
+                }
+                else if (type === 'zona-destino') {
+                    activeZonaDestino = val;
+                    activePlazaDestino = 'ALL'; // Reset
+                    renderDynamicPlazaButtons('destino', CUSTOM_RECORDS, activeZonaDestino);
+                    showToast(`Zona Destino: ${btn.innerText}`);
+                }
+                else if (type === 'plaza-destino') {
+                    activePlazaDestino = val;
+                    showToast(`Plaza Destino: ${btn.innerText}`);
+                }
+
+                syncSimulatorControls();
+                updateDashboard();
             });
         }
 
@@ -2028,11 +2205,11 @@
             
             if (uniqueFPs.length <= 1) {
                 group.style.display = 'none';
-                dropdown.innerHTML = `<option value="ALL">Todas las Fases Padres</option>`;
+                dropdown.innerHTML = `<option value="ALL" selected>Todas las Fases Padres</option>`;
                 return;
             }
 
-            let html = `<option value="ALL">Todas las Fases Padres (${uniqueFPs.length})</option>`;
+            let html = `<option value="ALL" selected>Todas las Fases Padres (${uniqueFPs.length})</option>`;
             uniqueFPs.forEach(fp => {
                 html += `<option value="${fp}">${fp}</option>`;
             });
@@ -2044,21 +2221,27 @@
         function rebuildFaseDropdown() {
             if (!isCustomDatasetLoaded) return;
             
-            const fpDropdown = document.getElementById('filterFasePadre');
-            const activeFasePadre = fpDropdown ? fpDropdown.value : "ALL";
-            
             let subset = CUSTOM_RECORDS;
-            if (activePlaza !== 'ALL') subset = subset.filter(r => r.PlazaOrigen === activePlaza);
-            if (activeFasePadre !== 'ALL') subset = subset.filter(r => r.FasePadre === activeFasePadre);
+            if (activeZonaOrigen !== 'ALL') subset = subset.filter(r => r.ZonaOrigen === activeZonaOrigen);
+            if (activePlazaOrigen !== 'ALL') subset = subset.filter(r => r.PlazaOrigen === activePlazaOrigen);
+            if (activeZonaDestino !== 'ALL') subset = subset.filter(r => r.ZonaDestino === activeZonaDestino);
+            if (activePlazaDestino !== 'ALL') subset = subset.filter(r => r.PlazaDestino === activePlazaDestino);
+            
+            // Allow checking multiple parent phases
+            if (activeFasePadre !== 'ALL') {
+                const arrFP = activeFasePadre.split(',');
+                subset = subset.filter(r => arrFP.includes(r.FasePadre));
+            }
             
             const uniqueFases = [...new Set(subset.map(r => r.Fase))].filter(Boolean);
             
             const select = document.getElementById('filterFase');
             if (!select) return;
             
-            const previousVal = select.value;
+            // Guarda selecciones previas si no es ALL
+            const prevOptions = Array.from(select.selectedOptions).map(o => o.value);
             
-            let html = `<option value="ALL">Todas las Fases (${uniqueFases.length})</option>`;
+            let html = `<option value="ALL" ${prevOptions.includes("ALL") || prevOptions.length === 0 ? "selected" : ""}>Todas las Fases (${uniqueFases.length})</option>`;
             uniqueFases.forEach(fase => {
                 const label = fase.toLowerCase().includes('recepcion') ? 'Recepción Mercancía Almacén' :
                               fase.toLowerCase().includes('carga') ? 'Carga / Estiba de Contenedor' :
@@ -2066,29 +2249,53 @@
                               fase.toLowerCase().includes('bajada') ? 'Bajada Muelle (Tránsito Puerto)' :
                               fase.toLowerCase().includes('entrega') ? 'Entrega Mercancía' :
                               fase.toLowerCase().includes('descarga') ? 'Descarga de Contenedor' : fase;
-                html += `<option value="${fase}">${label}</option>`;
+                const isSelected = prevOptions.includes(fase) && !prevOptions.includes("ALL") ? "selected" : "";
+                html += `<option value="${fase}" ${isSelected}>${label}</option>`;
             });
             
             select.innerHTML = html;
+        }
+
+        // Returns the filtered subset of CUSTOM_RECORDS based on ALL active UI filters, including Pareto if active
+        function getActiveFilteredSubset(overrideFase = null) {
+            let subset = CUSTOM_RECORDS;
+            if (activeZonaOrigen !== 'ALL') subset = subset.filter(r => r.ZonaOrigen === activeZonaOrigen);
+            if (activePlazaOrigen !== 'ALL') subset = subset.filter(r => r.PlazaOrigen === activePlazaOrigen);
+            if (activeZonaDestino !== 'ALL') subset = subset.filter(r => r.ZonaDestino === activeZonaDestino);
+            if (activePlazaDestino !== 'ALL') subset = subset.filter(r => r.PlazaDestino === activePlazaDestino);
             
-            if (uniqueFases.includes(previousVal)) {
-                select.value = previousVal;
-            } else {
-                select.value = "ALL";
+            if (activeFasePadre !== 'ALL') {
+                const arrFP = activeFasePadre.split(',');
+                subset = subset.filter(r => arrFP.includes(r.FasePadre));
             }
+
+            const currentFase = overrideFase !== null ? overrideFase : activeFase;
+            if (currentFase !== 'ALL') {
+                const arrF = currentFase.split(',');
+                subset = subset.filter(r => arrF.includes(r.Fase));
+            }
+
+            if (activeADR !== 'ALL') subset = subset.filter(r => r.ADR === activeADR);
+            if (activeCompleto !== 'ALL') subset = subset.filter(r => r.Completo === activeCompleto);
+            if (activeDia !== 'ALL') {
+                const arrD = activeDia.split(',');
+                subset = subset.filter(r => arrD.includes(r.Dia));
+            }
+
+            const paretoInput = document.getElementById('filterPareto');
+            if (paretoInput && parseInt(paretoInput.value) < 100) {
+                const { paretoSet } = calculateParetoThreshold(subset, parseInt(paretoInput.value));
+                subset = subset.filter(r => paretoSet.has(r.NumPartidas));
+            }
+
+            return subset;
         }
 
         // Filters custom records and calculates statistics in real-time
-        function getCustomStatsForFilters(plaza, fasePadre, fase, adr, dia) {
-            let subset = CUSTOM_RECORDS;
-            if (plaza !== 'ALL') subset = subset.filter(r => r.PlazaOrigen === plaza);
-            if (fasePadre !== 'ALL') subset = subset.filter(r => r.FasePadre === fasePadre);
-            if (fase !== 'ALL') subset = subset.filter(r => r.Fase === fase);
-            if (adr !== 'ALL') subset = subset.filter(r => r.ADR === adr);
-            if (dia !== 'ALL') {
-                const arr = dia.split(',');
-                subset = subset.filter(r => arr.includes(r.Dia));
-            }
+        function getCustomStatsForFilters(zOrigen, pOrigen, zDestino, pDestino, fasePadre, fase, adr, dia) {
+            // We use the helper directly. We pass "fase" as an override because the Phase Table
+            // needs to loop through each phase, ignoring the global dropdown's activeFase for that row.
+            const subset = getActiveFilteredSubset(fase);
             
             if (subset.length === 0) return null;
             
@@ -2131,7 +2338,7 @@
             const fpGroup = document.getElementById('filterFasePadreGroup');
             if (fpGroup) fpGroup.style.display = 'none';
             const fpDropdown = document.getElementById('filterFasePadre');
-            if (fpDropdown) fpDropdown.innerHTML = `<option value="ALL">Todas las Fases Padres</option>`;
+            if (fpDropdown) fpDropdown.innerHTML = `<option value="ALL" selected>Todas las Fases Padres</option>`;
 
             // Reset other filters
             resetAllFilters();
@@ -2214,7 +2421,7 @@
             const file = event.target.files[0];
             if (!file) return;
             
-            document.getElementById('loaderOverlay').classList.add('show');
+            showLoader();
             
             setTimeout(() => {
                 const reader = new FileReader();
@@ -2241,7 +2448,7 @@
                         
                         const processedRecords = rawRecords.map(r => {
                             const cod = r.Codigo ? r.Codigo.toString() : '';
-                            const fechaVal = r.FechaExpedicion ? r.FechaExpedicion.toString() : '';
+                            const fechaVal = r.FechaExpedicion; // Pass exactly what XLSX gave us (could be Number or String)
                             const dayInt = getDayIntFromFecha(fechaVal);
                             const diasMap = {0: 'Lunes', 1: 'Martes', 2: 'Miércoles', 3: 'Jueves', 4: 'Viernes', 5: 'Sábado', 6: 'Domingo'};
                             const diaReal = diasMap[dayInt] || 'Lunes';
@@ -2253,8 +2460,29 @@
                             // Parse optional parent phase column or default to 2 - EXPORTACION
                             const fpVal = r.FasePadre ? r.FasePadre.toString().trim() : '2 - EXPORTACION';
                             
+                            // Classification of Zone
+                            const dest = r.PlazaDestino ? r.PlazaDestino.toString().toUpperCase().trim() : '';
+                            const orig = r.PlazaOrigen ? r.PlazaOrigen.toString().toUpperCase().trim() : '';
+                            const baleares = ['PMI', 'MAH', 'IBZ'];
+                            const canarias = ['LPA', 'ACE', 'TFN', 'TFS', 'TCI', 'FUE', 'SPC', 'SCT'];
+                            
+                            let zonaOrigenAsignada = 'Península';
+                            if (baleares.includes(orig)) zonaOrigenAsignada = 'Baleares';
+                            else if (canarias.includes(orig)) zonaOrigenAsignada = 'Canarias';
+
+                            let zonaDestinoAsignada = 'Península';
+                            if (baleares.includes(dest)) zonaDestinoAsignada = 'Baleares';
+                            else if (canarias.includes(dest)) zonaDestinoAsignada = 'Canarias';
+                            
+                            const completoBin = (r.Completo && r.Completo.toString().toUpperCase().trim() === 'SI') ? 1 : 0;
+                            const completoStr = completoBin === 1 ? 'SI' : 'NO';
+                            
                             return {
-                                PlazaOrigen: r.PlazaOrigen ? r.PlazaOrigen.toString().trim() : '',
+                                ZonaOrigen: zonaOrigenAsignada,
+                                ZonaDestino: zonaDestinoAsignada,
+                                Zona: zonaOrigenAsignada,
+                                PlazaOrigen: orig,
+                                PlazaDestino: dest,
                                 FasePadre: fpVal,
                                 Fase: r.Fase ? r.Fase.toString().trim() : '',
                                 ADR: adrStr,
@@ -2266,7 +2494,8 @@
                                 Dia: diaReal,
                                 Dia_Int: dayInt,
                                 Dia_Binario: diaBin,
-                                Dia_Grupo: diaGrp
+                                Dia_Grupo: diaGrp,
+                                Completo: completoStr
                             };
                         });
                         
@@ -2293,14 +2522,14 @@
                         recalculateAllDashboardStats(processedRecords);
                         
                         document.getElementById('btnResetDefault').style.display = 'inline-flex';
-                        document.getElementById('loaderOverlay').classList.remove('show');
+                        hideLoader();
                         showToast(`¡Excel cargado! ${processedRecords.length.toLocaleString()} registros procesados.`);
                         
                         // Force dashboard update to show the newly loaded data immediately
                         updateDashboard();
                         
                     } catch(err) {
-                        document.getElementById('loaderOverlay').classList.remove('show');
+                        hideLoader();
                         alert(`Error al procesar el archivo Excel: ${err.message}`);
                     }
                 };
@@ -2309,28 +2538,329 @@
             }, 100);
         }
 
+        // --- REMOTE CONNECTION LOGIC ---
+        function connectRemoteExcel() {
+            const input = document.getElementById('remoteUrlInput');
+            const url = input.value.trim();
+            if (!url) {
+                alert("Por favor, introduce un link válido.");
+                return;
+            }
+            localStorage.setItem('remoteExcelUrl', url);
+            fetchExcelFromUrl(url);
+        }
+
+        async function fetchExcelFromUrl(url) {
+            showLoader();
+            try {
+                let fetchUrl = url;
+                
+                if (url.includes('docs.google.com') && url.includes('/edit')) {
+                    throw new Error("Estás usando el link de edición estándar de Google Drive. Por restricciones de seguridad (CORS) de Google, no se puede leer directamente este link.\n\nSOLUCIÓN (toma 10 segundos):\n1. Ve a tu Google Sheet\n2. Haz clic en 'Archivo' > 'Compartir' > 'Publicar en la web'\n3. Elige 'Todo el documento' y 'Microsoft Excel (.xlsx)' o 'Valores separados por comas (.csv)'\n4. Dale a 'Publicar' y Pega ese nuevo enlace aquí.");
+                }
+                
+                if (url.includes('/pubhtml')) {
+                    throw new Error("Pegaste el enlace de 'Página web'. \nDebes seleccionar 'Microsoft Excel (.xlsx)' o 'Valores separados por comas (.csv)' en el menú desplegable de Google Sheets al publicar en la web, en vez de 'Página web'.");
+                }
+
+                // If it's a pub link or direct link, fetch it directly
+                const response = await fetch(fetchUrl);
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status} - No se pudo descargar el archivo.`);
+                }
+                
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("text/html")) {
+                    throw new Error("El enlace proporcionado devuelve una página web en lugar de un archivo de datos.\nSi usaste Google Sheets, asegúrate de haber seleccionado 'Microsoft Excel (.xlsx)' en lugar de 'Página Web' al publicarlo.");
+                }
+                
+                const arrayBuffer = await response.arrayBuffer();
+                
+                setTimeout(() => {
+                    try {
+                        const data = new Uint8Array(arrayBuffer);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        processParsedWorkbook(workbook);
+                    } catch(err) {
+                        hideLoader();
+                        alert(`Error al procesar los datos: ${err.message}`);
+                    }
+                }, 100);
+
+            } catch (err) {
+                hideLoader();
+                alert(`Aviso de Conexión:\n\n${err.message}`);
+                localStorage.removeItem('remoteExcelUrl');
+            }
+        }
+
+        function processParsedWorkbook(workbook) {
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const rawRecords = XLSX.utils.sheet_to_json(worksheet);
+            
+            if (rawRecords.length === 0) {
+                throw new Error("El archivo de Excel está vacío.");
+            }
+            
+            const sample = rawRecords[0];
+            const requiredCols = ['PlazaOrigen', 'Fase', 'ADR', 'FechaExpedicion', 'Codigo', 'NumPartidas', 'DuracionMinutos'];
+            const missing = requiredCols.filter(col => !(col in sample));
+            if (missing.length > 0) {
+                throw new Error(`Faltan columnas obligatorias: ${missing.join(', ')}`);
+            }
+            
+            const processedRecords = rawRecords.map(r => {
+                const cod = r.Codigo ? r.Codigo.toString() : '';
+                const fechaVal = r.FechaExpedicion; // Pass exactly what XLSX gave us
+                const dayInt = getDayIntFromFecha(fechaVal);
+                const diasMap = {0: 'Lunes', 1: 'Martes', 2: 'Miércoles', 3: 'Jueves', 4: 'Viernes', 5: 'Sábado', 6: 'Domingo'};
+                const diaReal = diasMap[dayInt] || 'Lunes';
+                const diaBin = dayInt >= 3 ? 1 : 0;
+                const diaGrp = diaBin === 1 ? 'J-V' : 'L-X';
+                const adrBin = (r.ADR && r.ADR.toString().toUpperCase() === 'SI') ? 1 : 0;
+                const adrStr = adrBin === 1 ? 'SI' : 'NO';
+                
+                // Parse optional parent phase column or default to 2 - EXPORTACION
+                const fpVal = r.FasePadre ? r.FasePadre.toString().trim() : '2 - EXPORTACION';
+                
+                // Classification of Zones
+                const dest = r.PlazaDestino ? r.PlazaDestino.toString().toUpperCase().trim() : '';
+                const orig = r.PlazaOrigen ? r.PlazaOrigen.toString().toUpperCase().trim() : '';
+                const baleares = ['PMI', 'MAH', 'IBZ'];
+                const canarias = ['LPA', 'ACE', 'TFN', 'TFS', 'TCI', 'FUE', 'SPC'];
+                
+                let zonaOrig = 'Península';
+                if (baleares.includes(orig)) {
+                    zonaOrig = 'Baleares';
+                } else if (canarias.includes(orig)) {
+                    zonaOrig = 'Canarias';
+                }
+
+                let zonaDest = 'Península';
+                if (baleares.includes(dest)) {
+                    zonaDest = 'Baleares';
+                } else if (canarias.includes(dest)) {
+                    zonaDest = 'Canarias';
+                }
+                
+                return {
+                    ZonaOrigen: zonaOrig,
+                    ZonaDestino: zonaDest,
+                    PlazaOrigen: orig,
+                    PlazaDestino: dest,
+                    FasePadre: fpVal,
+                    Fase: r.Fase ? r.Fase.toString().trim() : '',
+                    ADR: adrStr,
+                    ADR_Binario: adrBin,
+                    FechaExpedicion: fechaVal,
+                    Codigo: cod,
+                    NumPartidas: parseInt(r.NumPartidas) || 1,
+                    DuracionMinutos: parseFloat(r.DuracionMinutos) || 0.0,
+                    Dia: diaReal,
+                    Dia_Int: dayInt,
+                    Dia_Binario: diaBin,
+                    Dia_Grupo: diaGrp
+                };
+            });
+            
+            if (!ORIGINAL_DASHBOARD_STATS) {
+                ORIGINAL_DASHBOARD_STATS = JSON.parse(JSON.stringify(DASHBOARD_STATS));
+                ORIGINAL_REGRESIONES_STATS = JSON.parse(JSON.stringify(REGRESIONES_STATS));
+                ORIGINAL_PARTIDAS_STATS = JSON.parse(JSON.stringify(PARTIDAS_STATS));
+            }
+            
+            isCustomDatasetLoaded = true;
+            CUSTOM_RECORDS = processedRecords;
+            
+            // Show the app body and hide the welcome screen
+            document.getElementById('dashboardAppBody').style.display = 'block';
+            document.getElementById('welcomeScreen').style.display = 'none';
+            
+            // Render dynamic plaza buttons based on available options
+            renderDynamicPlazaButtons('origen', processedRecords, activeZonaOrigen);
+            renderDynamicPlazaButtons('destino', processedRecords, activeZonaDestino);
+            
+            // Dynamically populate parent phases
+            updateFilterFasePadreDropdown(processedRecords);
+            
+            recalculateAllDashboardStats(processedRecords);
+            
+            document.getElementById('btnResetDefault').style.display = 'inline-flex';
+            document.getElementById('loaderOverlay').classList.remove('show');
+            showToast(`¡Datos remotos conectados! ${processedRecords.length.toLocaleString()} registros procesados.`);
+            
+            // Force dashboard update
+            updateDashboard();
+        }
+
         // Active Filter States
-        let activePlaza = "ALL";
+        let activeZonaOrigen = "ALL";
+        let activePlazaOrigen = "ALL";
+        let activeZonaDestino = "ALL";
+        let activePlazaDestino = "ALL";
+        let activeFasePadre = "ALL";
         let activeFase = "ALL";
         let activeDia = "ALL";
         let activeADR = "ALL";
+        let activeCompleto = "ALL";
 
         // Chart instances
         let mainChartInstance = null;
         let stabilityChartInstance = null;
+        let paretoChartInstance = null;
+
+        // Pareto calculation helper
+        function calculateParetoThreshold(subset, pct = 100) {
+            const freq = {};
+            for(let i=0; i<subset.length; i++) {
+                const p = subset[i].NumPartidas;
+                freq[p] = (freq[p] || 0) + 1;
+            }
+            const sortedKeys = Object.keys(freq).map(Number).sort((a,b) => freq[b] - freq[a]);
+            const threshold = subset.length * (pct / 100.0);
+            let cumulative = 0;
+            const paretoSet = new Set();
+            for(const key of sortedKeys) {
+                cumulative += freq[key];
+                paretoSet.add(key);
+                if (cumulative >= threshold) break;
+            }
+            return { paretoSet, freq, sortedKeys, total: subset.length };
+        }
+
+        // Render the Pareto Chart (80/20)
+        function renderParetoChart(subset) {
+            const canvas = document.getElementById('paretoChart');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            if (paretoChartInstance) paretoChartInstance.destroy();
+
+            if (!subset || subset.length === 0) return;
+
+            const paretoInput = document.getElementById('filterPareto');
+            const activePct = paretoInput ? parseInt(paretoInput.value) : 100;
+            const { paretoSet, freq, sortedKeys, total } = calculateParetoThreshold(subset, activePct);
+            
+            const labels = [];
+            const barData = [];
+            const lineData = [];
+            let cumulative = 0;
+
+            // Only show up to the top 15 most frequent to avoid chart clutter
+            const topKeys = sortedKeys.slice(0, 15);
+
+            for (const key of topKeys) {
+                labels.push(`${key} part.`);
+                const count = freq[key];
+                barData.push(count);
+                
+                cumulative += count;
+                const cumPct = (cumulative / total) * 100;
+                lineData.push(cumPct.toFixed(2));
+            }
+
+            const isLight = document.body.classList.contains('light-theme');
+            const textColor = isLight ? '#4b5563' : '#9ca3af';
+            const gridColor = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+
+            // Identify which bars are inside the 80%
+            const backgroundColors = topKeys.map(k => paretoSet.has(k) ? 'rgba(59, 130, 246, 0.7)' : 'rgba(107, 114, 128, 0.3)');
+            const borderColors = topKeys.map(k => paretoSet.has(k) ? '#3b82f6' : '#6b7280');
+
+            paretoChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            type: 'line',
+                            label: '% Acumulado',
+                            data: lineData,
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            borderWidth: 2,
+                            yAxisID: 'y1',
+                            tension: 0.3,
+                            fill: true,
+                            pointBackgroundColor: '#f59e0b'
+                        },
+                        {
+                            type: 'bar',
+                            label: 'Expediciones',
+                            data: barData,
+                            backgroundColor: backgroundColors,
+                            borderColor: borderColors,
+                            borderWidth: 1,
+                            yAxisID: 'y'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: textColor, font: { family: 'Inter' } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.datasetIndex === 0) return `Acumulado: ${context.raw}%`;
+                                    return `Volumen: ${context.raw.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: textColor },
+                            grid: { display: false }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            ticks: { color: textColor },
+                            grid: { color: gridColor }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            min: 0,
+                            max: 100,
+                            ticks: {
+                                color: '#f59e0b',
+                                callback: function(value) { return value + '%' }
+                            },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
 
         // Initialize App on DOM Content Loaded
         document.addEventListener('DOMContentLoaded', () => {
+            // Restore saved remote URL if any
+            const savedUrl = localStorage.getItem('remoteExcelUrl');
+            if (savedUrl) {
+                const urlInput = document.getElementById('remoteUrlInput');
+                if (urlInput) urlInput.value = savedUrl;
+            }
+
             // Backup initial precalculated stats immediately
             ORIGINAL_DASHBOARD_STATS = typeof DASHBOARD_STATS !== 'undefined' ? JSON.parse(JSON.stringify(DASHBOARD_STATS)) : {};
             ORIGINAL_REGRESIONES_STATS = typeof REGRESIONES_STATS !== 'undefined' ? JSON.parse(JSON.stringify(REGRESIONES_STATS)) : [];
             ORIGINAL_PARTIDAS_STATS = typeof PARTIDAS_STATS !== 'undefined' ? JSON.parse(JSON.stringify(PARTIDAS_STATS)) : [];
 
             // Render default plazas dynamically
-            renderPlazaSelector(['ALC', 'BCN', 'VLC']);
+            renderDynamicPlazaButtons('origen', [], 'ALL');
+            renderDynamicPlazaButtons('destino', [], 'ALL');
 
             initCharts();
             loadPartidasTable();
+            initGeographicSelectors();
             updateDashboard();
 
             // Apply saved theme state on load
@@ -2348,6 +2878,15 @@
                 }
                 // Apply immediately
                 updateChartsTheme(true);
+            }
+
+            // Restore remote URL if it was saved, but do NOT autoconnect (wait for user click)
+            const savedRemoteUrl = localStorage.getItem('remoteExcelUrl');
+            if (savedRemoteUrl) {
+                const urlInput = document.getElementById('remoteUrlInput');
+                if (urlInput) {
+                    urlInput.value = savedRemoteUrl;
+                }
             }
         });
 
@@ -2385,19 +2924,14 @@
         function updatePartidasTableReactively() {
             if (!isCustomDatasetLoaded) return;
 
-            const fpDropdown = document.getElementById('filterFasePadre');
-            const activeFasePadre = fpDropdown ? fpDropdown.value : "ALL";
-
-            // Filter subset by active dashboard filters
-            let subset = CUSTOM_RECORDS;
-            if (activePlaza !== 'ALL') subset = subset.filter(r => r.PlazaOrigen === activePlaza);
-            if (activeFasePadre !== 'ALL') subset = subset.filter(r => r.FasePadre === activeFasePadre);
-            if (activeFase !== 'ALL') subset = subset.filter(r => r.Fase === activeFase);
-            if (activeADR !== 'ALL') subset = subset.filter(r => r.ADR === activeADR);
-            if (activeDia !== 'ALL') {
-                const arr = activeDia.split(',');
-                subset = subset.filter(r => arr.includes(r.Dia));
-            }
+            // We want to calculate the pareto subset, but we DO NOT want to apply the pareto filter 
+            // inside the Partidas table calculation itself, otherwise the bottom 20% of the table would disappear!
+            // Actually, if they activate Pareto, maybe they DO want the table to only show the top 80% rows.
+            // Let's use the helper to filter it consistently.
+            const subset = getActiveFilteredSubset(null);
+            
+            // Render the Pareto chart based on current volume
+            renderParetoChart(subset);
 
             const tbody = document.getElementById('partidasTableBody');
             if (!tbody) return;
@@ -2446,9 +2980,17 @@
 
         // Reset all filters to default
         function resetAllFilters() {
-            document.querySelectorAll('.plaza-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector('.plaza-btn[data-value="ALL"]').classList.add('active');
-            activePlaza = "ALL";
+            document.querySelectorAll('.plaza-btn').forEach(btn => {
+                if (btn.getAttribute('data-value') === 'ALL') {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            activeZonaOrigen = "ALL";
+            activePlazaOrigen = "ALL";
+            activeZonaDestino = "ALL";
+            activePlazaDestino = "ALL";
 
             document.getElementById('filterFase').value = "ALL";
             document.getElementById('filterDia').value = "ALL";
@@ -2468,25 +3010,33 @@
             }, 3000);
         }
 
-        // Get key for the precalculated statistics JSON
-        function getStatsKey(plaza, fase, adr, dia) {
-            return `Plaza:${plaza}|Fase:${fase}|ADR:${adr}|Dia:${dia}`;
+        // Get key for the precalculated statistics JSON (legacy, not used for custom dataset)
+        function getStatsKey(plazaO, plazaD, fase, adr, dia) {
+            return `PlazaO:${plazaO}|PlazaD:${plazaD}|Fase:${fase}|ADR:${adr}|Dia:${dia}`;
         }
 
         // Update dashboard KPIs, Charts, Regressions, and Predictor
         function updateDashboard() {
+            const selFasePadre = document.getElementById('filterFasePadre') ? Array.from(document.getElementById('filterFasePadre').selectedOptions).map(o => o.value) : ['ALL'];
+            activeFasePadre = 'ALL';
+            if (!selFasePadre.includes('ALL') && selFasePadre.length > 0) activeFasePadre = selFasePadre.sort().join(',');
+
+            // Actualizar Opciones dependientes
             rebuildFaseDropdown();
 
-            activeFase = document.getElementById('filterFase').value;
-            const selectedOptions = Array.from(document.getElementById('filterDia').selectedOptions).map(o => o.value);
+            // Recoger valores del UI para Fases (multiples) DESPUÉS de reconstruir
+            const selFase = Array.from(document.getElementById('filterFase').selectedOptions).map(o => o.value);
+            activeFase = 'ALL';
+            if (!selFase.includes('ALL') && selFase.length > 0) activeFase = selFase.sort().join(',');
+
+            const selectedDias = Array.from(document.getElementById('filterDia').selectedOptions).map(o => o.value);
             activeDia = 'ALL';
-            if (!selectedOptions.includes('ALL') && selectedOptions.length > 0) {
-                activeDia = selectedOptions.sort().join(',');
+            if (!selectedDias.includes('ALL') && selectedDias.length > 0) {
+                activeDia = selectedDias.sort().join(',');
             }
             activeADR = document.getElementById('filterADR').value;
-            
-            const fpDropdown = document.getElementById('filterFasePadre');
-            const activeFasePadre = fpDropdown ? fpDropdown.value : "ALL";
+            const filterCompletoElem = document.getElementById('filterCompleto');
+            activeCompleto = filterCompletoElem ? filterCompletoElem.value : 'ALL';
 
             // Update Tukey per phase table dynamically based on other active filters
             updateTukeyPhaseTable();
@@ -2496,9 +3046,9 @@
 
             let stats = null;
             if (isCustomDatasetLoaded) {
-                stats = getCustomStatsForFilters(activePlaza, activeFasePadre, activeFase, activeADR, activeDia);
+                stats = getCustomStatsForFilters(activeZonaOrigen, activePlazaOrigen, activeZonaDestino, activePlazaDestino, activeFasePadre, activeFase, activeADR, activeDia);
             } else {
-                const key = getStatsKey(activePlaza, activeFase, activeADR, activeDia);
+                const key = getStatsKey(activePlazaOrigen, activePlazaDestino, activeFase, activeADR, activeDia);
                 stats = DASHBOARD_STATS[key];
                 
                 // Add debug visually
@@ -2663,9 +3213,9 @@
             phasesList.forEach(pInfo => {
                 let pStats = null;
                 if (isCustomDatasetLoaded) {
-                    pStats = getCustomStatsForFilters(activePlaza, activeFasePadre, pInfo.id, activeADR, activeDia);
+                    pStats = getCustomStatsForFilters(activeZonaOrigen, activePlazaOrigen, activeZonaDestino, activePlazaDestino, activeFasePadre, pInfo.id, activeADR, activeDia);
                 } else {
-                    const pKey = `Plaza:${activePlaza}|Fase:${pInfo.id}|ADR:${activeADR}|Dia:${activeDia}`;
+                    const pKey = getStatsKey(activePlazaOrigen, activePlazaDestino, pInfo.id, activeADR, activeDia);
                     pStats = DASHBOARD_STATS[pKey];
                 }
 
@@ -2888,7 +3438,7 @@
                 }
             }
             
-            let rawCoef = getRegressionCoefficients(activePlaza, activeFase);
+            let rawCoef = getRegressionCoefficients(activePlazaOrigen, activeFase);
             const coefList = document.getElementById('coefList');
             const formulaContainer = document.getElementById('formulaContainer');
             const regNote = document.getElementById('regressionNote');
@@ -3024,7 +3574,7 @@
 
         // Live calculation for the Simulator
         function calculatePrediction() {
-            const coef = getRegressionCoefficients(activePlaza, activeFase);
+            const coef = getRegressionCoefficients(activePlazaOrigen, activeFase);
             if (!coef || activeFase === 'BAJADA MUELLE ORIGEN') return;
 
             const numPartidasVal = parseInt(document.getElementById('simPartidas').value);
@@ -3068,8 +3618,11 @@
             document.getElementById('predictionValueFormatted').innerText = formattedStr;
 
             // Predict Risk/Delays based on standard Tukey limit
-            const key = getStatsKey(activePlaza, activeFase, activeADR, activeDia);
-            const stats = DASHBOARD_STATS[key];
+            const key = getStatsKey(activePlazaOrigen, activePlazaDestino, activeFase, activeADR, activeDia);
+            let stats = DASHBOARD_STATS[key];
+            if (isCustomDatasetLoaded) {
+                stats = getCustomStatsForFilters(activeZonaOrigen, activePlazaOrigen, activeZonaDestino, activePlazaDestino, activeFasePadre, activeFase, activeADR, activeDia);
+            }
             const limit = stats ? stats.Limite_Tukey : 9999;
 
             const resultBox = document.getElementById('predictionResultBox');
@@ -3192,6 +3745,7 @@
         <div class="loader-card">
             <div class="loader-spinner"></div>
             <h4 style="margin-top: 1.25rem; font-size: 1.2rem; color: var(--text-primary);">Procesando y Analizando Excel...</h4>
+            <div id="loaderTimer" style="font-size: 2.2rem; font-weight: 800; font-family: 'Outfit', sans-serif; color: var(--primary); margin-top: 0.5rem; text-shadow: 0 0 10px rgba(59,130,246,0.3);">00:00</div>
             <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem; max-width: 320px; line-height: 1.5;">
                 Aplicando filtro de Tukey por fase, calculando percentiles P5 (Mejor Caso) y resolviendo regresiones OLS multivariables en tiempo real...
             </p>

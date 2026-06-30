@@ -2,10 +2,48 @@ import pandas as pd
 import numpy as np
 import statsmodels.api as sm
 import hashlib
+import requests
+import os
+
+def download_file_from_google_drive(id, destination):
+    URL = "https://docs.google.com/uc?export=download"
+    session = requests.Session()
+    response = session.get(URL, params={'id': id, 'confirm': 't'}, stream=True)
+    
+    token = None
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            token = value
+            break
+
+    if token:
+        params = {'id': id, 'confirm': token}
+        response = session.get(URL, params=params, stream=True)
+
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(32768):
+            if chunk: 
+                f.write(chunk)
 
 # 1. Cargar datos
-file_path = r'c:\Users\castudillo\Documents\Proyectos Antigravity\TDS\Exportaciones - Volumetrica.xlsx'
-df = pd.read_excel(file_path)
+print("Downloading Excel dataset from Google Drive...")
+link = input("Pegue el enlace de Google Drive del archivo Excel (o presione Enter para usar el guardado): ").strip()
+if not link:
+    file_id = '1klPa3Xkor3zdT8F5k6k63WR9-gHr4Kx6'
+else:
+    import re
+    match = re.search(r'/d/([a-zA-Z0-9_-]+)', link)
+    if match:
+        file_id = match.group(1)
+    else:
+        match = re.search(r'id=([a-zA-Z0-9_-]+)', link)
+        file_id = match.group(1) if match else link
+
+temp_file = r'c:\Users\castudillo\Documents\Proyectos Antigravity\TDS\temp_dataset.xlsx'
+download_file_from_google_drive(file_id, temp_file)
+
+print("Loading Excel dataset...")
+df = pd.read_excel(temp_file)
 
 # 2. Asignar 'Día' calculando el día de la semana real a partir de FechaExpedicion
 def get_day_from_date(fecha):
